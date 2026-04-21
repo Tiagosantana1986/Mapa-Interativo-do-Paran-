@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Interativo do Paraná – Raio-X Político</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Fontes -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Estilos customizados -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+        #map {
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            z-index: 1;
+        }
+        /* Sidebar */
+        #sidebar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 350px;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border-right: 1px solid #e5e7eb;
+        }
+        #sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        #toggle-sidebar {
+            position: absolute;
+            top: 20px;
+            left: 350px;
+            z-index: 20;
+            background: white;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            padding: 10px 12px;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: left 0.3s ease;
+            font-weight: bold;
+            color: #14532D;
+        }
+        #sidebar.hidden + #toggle-sidebar {
+            left: 0;
+        }
+        /* Cabeçalho da sidebar */
+        .sidebar-header {
+            padding: 20px 16px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .stats-cards {
+            display: flex;
+            gap: 8px;
+            margin: 16px 0;
+        }
+        .stat-card {
+            flex: 1;
+            padding: 12px 8px;
+            border-radius: 10px;
+            background: #F0FDF4;
+        }
+        .stat-card.amber {
+            background: #FFFBEB;
+        }
+        /* Lista de municípios */
+        #city-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        .city-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+            margin-bottom: 2px;
+        }
+        .city-item:hover {
+            background: #f5f5f5;
+        }
+        .city-item.active {
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+        }
+        .city-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 13px;
+            margin-right: 12px;
+            color: #4b5563;
+        }
+        .city-item.active .city-number {
+            background: #14532D;
+            color: white;
+        }
+        .city-info {
+            flex: 1;
+        }
+        .city-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1f2937;
+        }
+        .city-meta {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+        /* Painel de detalhes (direita) */
+        #detail-panel {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            z-index: 10;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #e5e7eb;
+        }
+        #detail-panel.visible {
+            transform: translateX(0);
+        }
+        #close-detail {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.3);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 20px;
+            z-index: 5;
+        }
+        .detail-header {
+            padding: 24px 20px 16px;
+            color: white;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .detail-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        /* Legenda */
+        #legend {
+            position: absolute;
+            bottom: 24px;
+            left: 380px;
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 5;
+        }
+        /* Busca */
+        #search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+        }
+        #search-input:focus {
+            border-color: #16A34A;
+            box-shadow: 0 0 0 3px rgba(22,163,74,0.1);
+        }
+        .search-wrapper {
+            position: relative;
+        }
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <div class="sidebar-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 40px; height: 40px; background: #14532D; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">📍</div>
+            <div>
+                <h1 style="font-family: 'Playfair Display', serif; color: #14532D; font-size: 22px;">Paraná</h1>
+                <p style="font-size: 11px; color: #6b7280;">399 Municípios · Dados Completos</p>
+            </div>
+        </div>
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div>👥 <span style="font-size: 10px; color: #6b7280;">POPULAÇÃO</span></div>
+                <div style="font-weight: bold; font-size: 16px; color: #14532D;" id="total-pop">--</div>
+            </div>
+            <div class="stat-card amber">
+                <div>🗳️ <span style="font-size: 10px; color: #6b7280;">ELEITORES</span></div>
+                <div style="font-weight: bold; font-size: 16px; color: #92400E;" id="total-eleit">--</div>
+            </div>
+        </div>
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Buscar por nome, número ou prefeito...">
+        </div>
+        <p style="font-size: 11px; color: #9ca3af; margin-top: 8px;" id="result-count"></p>
+    </div>
+    <div id="city-list">
+        <!-- Lista dinâmica gerada via JS -->
+    </div>
+    <div style="padding: 16px; border-top: 1px solid #f0f0f0; text-align: center; font-size: 10px; color: #9ca3af;">
+        Fontes: IBGE (2025) · TSE (2022/2024)
+    </div>
+</div>
+
+<button id="toggle-sidebar">◀</button>
+
+<div id="map"></div>
+
+<div id="legend">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span>📊</span>
+        <span style="font-weight: 600; font-size: 12px; text-transform: uppercase; color: #374151;">População</span>
+    </div>
+    <div id="legend-items"></div>
+</div>
+
+<div id="detail-panel">
+    <button id="close-detail">✕</button>
+    <div class="detail-header" id="detail-header" style="background: linear-gradient(135deg, #14532D, #166534);">
+        <span id="detail-number" style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; width: fit-content; margin-bottom: 8px;">Nº --</span>
+        <h2 id="detail-name" style="font-family: 'Playfair Display', serif; font-size: 26px; font-weight: bold;">--</h2>
+    </div>
+    <div class="detail-content" id="detail-content">
+        <!-- Conteúdo dinâmico -->
+    </div>
+    <div style="padding: 16px; border-top: 1px solid #f0f0f0; text-align: center; font-size: 10px; color: #9ca3af;">
+        Dados oficiais: IBGE (2025) · TSE (2022/2024)
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    (function(){
+        // ----------------- CONFIGURAÇÕES -----------------
+        // ATENÇÃO: Substitua pelas URLs reais dos seus arquivos de dados!
+        const GEOJSON_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/parana_municipios_2d5ac5bd.geojson';
+        // Você pode adicionar URLs para vereadores e deputados posteriormente
+
+        // ----------------- ESTADO GLOBAL -----------------
+        let map;
+        let geojsonLayer;
+        let municipiosData = [];          // Array com todos os municípios (do GeoJSON)
+        let filteredData = [];
+        let selectedMunicipio = null;
+        let currentVereadores = {};       // Será populado quando você adicionar os dados
+        let currentDepEstaduais = {};
+        let currentDepFederais = {};
+
+        // Elementos DOM
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('toggle-sidebar');
+        const cityListDiv = document.getElementById('city-list');
+        const searchInput = document.getElementById('search-input');
+        const totalPopSpan = document.getElementById('total-pop');
+        const totalEleitSpan = document.getElementById('total-eleit');
+        const resultCountP = document.getElementById('result-count');
+        const detailPanel = document.getElementById('detail-panel');
+        const closeDetailBtn = document.getElementById('close-detail');
+        const detailHeader = document.getElementById('detail-header');
+        const detailNumber = document.getElementById('detail-number');
+        const detailName = document.getElementById('detail-name');
+        const detailContent = document.getElementById('detail-content');
+        const legendItems = document.getElementById('legend-items');
+
+        // ----------------- FUNÇÕES AUXILIARES -----------------
+        function formatNumber(n) {
+            return n ? n.toLocaleString('pt-BR') : '0';
+        }
+
+        function getColor(pop) {
+            if (pop > 500000) return '#14532D';
+            if (pop > 200000) return '#166534';
+            if (pop > 100000) return '#15803D';
+            if (pop > 50000) return '#16A34A';
+            if (pop > 20000) return '#22C55E';
+            if (pop > 10000) return '#4ADE80';
+            if (pop > 5000) return '#86EFAC';
+            return '#BBF7D0';
+        }
+
+        // Gera a legenda
+        function renderLegend() {
+            const faixas = [
+                { color: '#14532D', label: '> 500 mil' },
+                { color: '#166534', label: '200 - 500 mil' },
+                { color: '#15803D', label: '100 - 200 mil' },
+                { color: '#16A34A', label: '50 - 100 mil' },
+                { color: '#22C55E', label: '20 - 50 mil' },
+                { color: '#4ADE80', label: '10 - 20 mil' },
+                { color: '#86EFAC', label: '5 - 10 mil' },
+                { color: '#BBF7D0', label: '< 5 mil' }
+            ];
+            legendItems.innerHTML = faixas.map(f => `
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                    <div style="width: 16px; height: 12px; background: ${f.color}; border-radius: 2px;"></div>
+                    <span style="font-size: 11px; color: #4b5563;">${f.label}</span>
+                </div>
+            `).join('');
+        }
+
+        // Atualiza totais
+        function updateTotals() {
+            const totalPop = municipiosData.reduce((acc, m) => acc + (m.populacao || 0), 0);
+            const totalEleit = municipiosData.reduce((acc, m) => acc + (m.eleitores || 0), 0);
+            totalPopSpan.textContent = formatNumber(totalPop);
+            totalEleitSpan.textContent = formatNumber(totalEleit);
+        }
+
+        // Renderiza lista de municípios
+        function renderCityList(data) {
+            if (!data.length) {
+                cityListDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #9ca3af;">Nenhum município encontrado</div>';
+                return;
+            }
+            cityListDiv.innerHTML = data.map(m => {
+                const vereadoresCount = (currentVereadores[m.municipio.toUpperCase()] || []).length;
+                return `
+                    <div class="city-item" data-numero="${m.numero}">
+                        <div class="city-number">${m.numero}</div>
+                        <div class="city-info">
+                            <div class="city-name">${m.municipio}</div>
+                            <div class="city-meta">${formatNumber(m.populacao)} hab. · ${vereadoresCount} ver.</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            resultCountP.textContent = `${data.length} de ${municipiosData.length} municípios`;
+        }
+
+        // Filtra municípios
+        function filterMunicipios(query) {
+            if (!query) return municipiosData;
+            const q = query.toLowerCase();
+            return municipiosData.filter(m => 
+                m.municipio.toLowerCase().includes(q) ||
+                m.numero.toString().includes(q) ||
+                (m.prefeito && m.prefeito.toLowerCase().includes(q))
+            );
+        }
+
+        // Atualiza UI com base na busca
+        function handleSearch() {
+            const query = searchInput.value;
+            filteredData = filterMunicipios(query);
+            renderCityList(filteredData);
+        }
+
+        // Exibe detalhes do município
+        function showDetails(mun) {
+            selectedMunicipio = mun;
+            // Atualiza cabeçalho
+            const bgColor = getColor(mun.populacao);
+            detailHeader.style.background = `linear-gradient(135deg, ${bgColor}, #14532D)`;
+            detailNumber.textContent = `Nº ${mun.numero}`;
+            detailName.textContent = mun.municipio;
+
+            // Conteúdo básico
+            const vereadoresDoMunicipio = currentVereadores[mun.municipio.toUpperCase()] || [];
+            let html = `
+                <div style="background: #F0FDF4; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <span style="font-size: 20px;">👥</span>
+                        <div>
+                            <div style="font-size: 11px; color: #6b7280;">POPULAÇÃO (IBGE 2025)</div>
+                            <div style="font-weight: bold; font-size: 24px; color: #14532D;">${formatNumber(mun.populacao)}</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: #FFFBEB; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <span style="font-size: 20px;">🗳️</span>
+                        <div>
+                            <div style="font-size: 11px; color: #6b7280;">ELEITORES (TSE 2024)</div>
+                            <div style="font-weight: bold; font-size: 24px; color: #92400E;">${formatNumber(mun.eleitores)}</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: #F5F3FF; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 20px;">🏛️</span>
+                        <div>
+                            <div style="font-size: 11px; color: #6b7280;">PREFEITO(A) 2025-2028</div>
+                            <div style="font-weight: bold; font-size: 18px; color: #4C1D95;">${mun.prefeito || 'Não informado'}</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: #EFF6FF; border-radius: 12px; padding: 16px;">
+                    <div style="font-weight: 600; margin-bottom: 12px; color: #1E40AF;">👤 VEREADORES (${vereadoresDoMunicipio.length})</div>
+                    <div id="vereadores-list-container">
+                        ${vereadoresDoMunicipio.length ? 
+                            vereadoresDoMunicipio.map(v => `
+                                <div style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+                                    <div style="font-weight: 500;">${v.nome}</div>
+                                    <div style="font-size: 12px; color: #6b7280;">${v.partido} · Nº ${v.numero}</div>
+                                </div>
+                            `).join('') 
+                            : '<p style="color: #9ca3af;">Dados de vereadores não carregados</p>'
+                        }
+                    </div>
+                </div>
+                <!-- Adicione seções para deputados estaduais/federais conforme for implementando -->
+            `;
+            detailContent.innerHTML = html;
+            detailPanel.classList.add('visible');
+        }
+
+        // Esconde painel de detalhes
+        function hideDetails() {
+            detailPanel.classList.remove('visible');
+            selectedMunicipio = null;
+            if (geojsonLayer) geojsonLayer.resetStyle();
+        }
+
+        // Inicializa o mapa
+        function initMap(geojsonData) {
+            map = L.map('map', {
+                center: [-24.5, -51.5],
+                zoom: 7,
+                zoomControl: false
+            });
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19
+            }).addTo(map);
+
+            geojsonLayer = L.geoJSON(geojsonData, {
+                style: feature => ({
+                    fillColor: getColor(feature.properties.populacao || 0),
+                    weight: 1,
+                    opacity: 0.8,
+                    color: '#ffffff',
+                    fillOpacity: 0.75
+                }),
+                onEachFeature: (feature, layer) => {
+                    const props = feature.properties;
+                    layer.on({
+                        mouseover: (e) => {
+                            e.target.setStyle({ weight: 2, color: '#F59E0B', fillOpacity: 0.9 });
+                            e.target.bringToFront();
+                        },
+                        mouseout: (e) => geojsonLayer.resetStyle(e.target),
+                        click: () => {
+                            const mun = municipiosData.find(m => m.numero === props.numero);
+                            if (mun) {
+                                showDetails(mun);
+                                map.flyTo([props.lat, props.lng], 10, { duration: 0.8 });
+                                // Destaca o polígono selecionado
+                                geojsonLayer.eachLayer(l => {
+                                    if (l.feature.properties.numero === mun.numero) {
+                                        l.setStyle({ weight: 3, color: '#F59E0B', fillOpacity: 0.95 });
+                                        l.bringToFront();
+                                    } else {
+                                        geojsonLayer.resetStyle(l);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    // Adiciona rótulo com número
+                    if (props.lat && props.lng && props.numero) {
+                        L.marker([props.lat, props.lng], {
+                            icon: L.divIcon({
+                                className: 'municipio-label',
+                                html: `<span style="background: rgba(255,255,255,0.8); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; color: #14532D; border: 1px solid #ccc;">${props.numero}</span>`,
+                                iconSize: [30, 20],
+                                iconAnchor: [15, 10]
+                            }),
+                            interactive: false
+                        }).addTo(map);
+                    }
+                }
+            }).addTo(map);
+        }
+
+        // Carrega dados
+        async function loadData() {
+            try {
+                const geoRes = await fetch(GEOJSON_URL);
+                const geoData = await geoRes.json();
+                
+                municipiosData = geoData.features
+                    .filter(f => f.properties.numero)
+                    .map(f => ({
+                        numero: f.properties.numero,
+                        municipio: f.properties.municipio,
+                        populacao: f.properties.populacao || 0,
+                        eleitores: f.properties.eleitores || 0,
+                        prefeito: f.properties.prefeito || '',
+                        lat: f.properties.lat,
+                        lng: f.properties.lng
+                    }))
+                    .sort((a, b) => a.numero - b.numero);
+                
+                filteredData = municipiosData;
+                
+                // Carregar vereadores (exemplo, você precisa adicionar a URL correta)
+                // const verRes = await fetch(URL_VEREADORES);
+                // currentVereadores = await verRes.json();
+                
+                updateTotals();
+                renderCityList(municipiosData);
+                initMap(geoData);
+                renderLegend();
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                alert('Erro ao carregar dados. Verifique as URLs.');
+            }
+        }
+
+        // Event listeners
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            toggleBtn.textContent = sidebar.classList.contains('hidden') ? '▶' : '◀';
+        });
+        searchInput.addEventListener('input', handleSearch);
+        closeDetailBtn.addEventListener('click', hideDetails);
+        cityListDiv.addEventListener('click', (e) => {
+            const item = e.target.closest('.city-item');
+            if (item) {
+                const numero = parseInt(item.dataset.numero);
+                const mun = municipiosData.find(m => m.numero === numero);
+                if (mun) showDetails(mun);
+            }
+        });
+
+        // Iniciar
+        loadData();
+    })();
+</script>
+</body>
+</html>
