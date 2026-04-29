@@ -31,7 +31,6 @@
             overflow-x: hidden;
         }
 
-        /* ============ HERO ============ */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -41,20 +40,12 @@
             text-align: center;
             padding: 2rem;
             background: radial-gradient(circle at 50% 30%, #0f1d2e, var(--bg));
-            position: relative;
         }
-
-        .hero-icon {
-            font-size: 5rem;
-            margin-bottom: 1.5rem;
-            animation: float 3s ease-in-out infinite;
-        }
-
+        .hero-icon { font-size: 5rem; margin-bottom: 1.5rem; animation: float 3s ease-in-out infinite; }
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-15px); }
         }
-
         .hero h1 {
             font-family: 'Playfair Display', serif;
             font-size: clamp(2.5rem, 6vw, 4rem);
@@ -63,22 +54,14 @@
             margin-bottom: 1rem;
             line-height: 1.2;
         }
-
         .hero h1 span {
             background: linear-gradient(135deg, var(--accent), #38bdf8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        .hero .subtitle { font-size: 1.2rem; color: var(--text2); max-width: 600px; margin-bottom: 2rem; }
 
-        .hero .subtitle {
-            font-size: 1.2rem;
-            color: var(--text2);
-            max-width: 600px;
-            margin-bottom: 2rem;
-        }
-
-        /* ============ GOVERNOR CARD ============ */
         .governor-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -92,402 +75,136 @@
             align-items: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
-
         .governor-avatar {
-            width: 90px;
-            height: 90px;
+            width: 90px; height: 90px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--accent), var(--purple));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; flex-shrink: 0;
         }
-
-        .governor-info h3 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            color: #fff;
-        }
-
+        .governor-info h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #fff; }
         .governor-info .party-tag {
-            display: inline-block;
-            background: var(--accent);
-            color: #fff;
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            display: inline-block; background: var(--accent); color: #fff;
+            padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
             margin: 0.5rem 0;
         }
-
-        .governor-info p {
-            font-size: 0.9rem;
-            color: var(--text2);
-            margin-top: 0.25rem;
-        }
-
+        .governor-info p { font-size: 0.9rem; color: var(--text2); margin-top: 0.25rem; }
         .governor-speech {
-            font-style: italic;
-            color: var(--text2);
-            margin-top: 0.75rem;
-            border-left: 3px solid var(--accent);
-            padding-left: 1rem;
-            font-size: 0.95rem;
+            font-style: italic; color: var(--text2); margin-top: 0.75rem;
+            border-left: 3px solid var(--accent); padding-left: 1rem; font-size: 0.95rem;
         }
 
-        /* ============ STATS ROW ============ */
-        .stats-row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
+        .stats-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin: 2rem 0; }
         .stat-card {
-            background: rgba(19,26,34,0.8);
-            backdrop-filter: blur(8px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.5rem 2rem;
-            min-width: 170px;
-            text-align: center;
+            background: rgba(19,26,34,0.8); backdrop-filter: blur(8px);
+            border: 1px solid var(--border); border-radius: 20px;
+            padding: 1.5rem 2rem; min-width: 170px; text-align: center;
             transition: transform 0.2s, border-color 0.2s;
         }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent);
-        }
-
-        .stat-number {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.4rem;
-            font-weight: 800;
-            color: var(--accent);
-            display: block;
-        }
-
+        .stat-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+        .stat-number { font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 800; color: var(--accent); display: block; }
         .stat-number.amber { color: var(--amber); }
         .stat-number.green { color: var(--green); }
+        .stat-label { font-size: 0.85rem; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.25rem; }
 
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text2);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 0.25rem;
-        }
-
-        /* ============ HISTORY SECTION ============ */
-        .section {
-            max-width: 1000px;
-            margin: 4rem auto;
-            padding: 0 1.5rem;
-        }
-
-        .section h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            color: #fff;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
+        .section { max-width: 1000px; margin: 4rem auto; padding: 0 1.5rem; }
+        .section h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #fff; margin-bottom: 1.5rem; text-align: center; }
         .history-text {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 2rem;
-            color: var(--text2);
-            font-size: 0.95rem;
-            line-height: 1.8;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 2rem; color: var(--text2);
+            font-size: 0.95rem; line-height: 1.8;
         }
 
-        /* ============ CTA BUTTON ============ */
         .btn {
-            display: inline-block;
-            padding: 16px 40px;
+            display: inline-block; padding: 16px 40px;
             background: linear-gradient(135deg, var(--accent), #38bdf8);
-            color: #fff;
-            font-weight: 700;
-            font-size: 1rem;
-            border-radius: 50px;
-            text-decoration: none;
-            cursor: pointer;
-            border: none;
+            color: #fff; font-weight: 700; font-size: 1rem; border-radius: 50px;
+            text-decoration: none; cursor: pointer; border: none;
             transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 10px 25px rgba(46,170,220,0.3);
-            letter-spacing: 0.3px;
+            box-shadow: 0 10px 25px rgba(46,170,220,0.3); letter-spacing: 0.3px;
         }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 35px rgba(46,170,220,0.4);
-        }
-
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(46,170,220,0.4); }
         .btn-secondary {
-            background: transparent;
-            border: 2px solid var(--accent);
-            color: var(--accent);
-            box-shadow: none;
-            margin-left: 1rem;
+            background: transparent; border: 2px solid var(--accent);
+            color: var(--accent); box-shadow: none; margin-left: 1rem;
         }
+        .btn-secondary:hover { background: rgba(46,170,220,0.1); box-shadow: 0 10px 25px rgba(46,170,220,0.15); }
 
-        .btn-secondary:hover {
-            background: rgba(46,170,220,0.1);
-            box-shadow: 0 10px 25px rgba(46,170,220,0.15);
-        }
-
-        /* ============ MUNICIPALITY LIST PAGE ============ */
-        .muni-page {
-            display: none;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .muni-page.active {
-            display: block;
-        }
-
-        .muni-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .muni-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            color: #fff;
-        }
-
+        .muni-page { display: none; max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .muni-page.active { display: block; }
+        .muni-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+        .muni-header h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #fff; }
         .search-box {
-            padding: 12px 20px;
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            background: var(--surface);
-            color: var(--text);
-            font-size: 14px;
-            min-width: 280px;
-            outline: none;
+            padding: 12px 20px; border: 1px solid var(--border); border-radius: 30px;
+            background: var(--surface); color: var(--text); font-size: 14px;
+            min-width: 280px; outline: none;
         }
-
-        .search-box:focus {
-            border-color: var(--accent);
-        }
-
-        .muni-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1rem;
-        }
-
+        .search-box:focus { border-color: var(--accent); }
+        .muni-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
         .muni-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            cursor: pointer;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.5rem; cursor: pointer;
             transition: all 0.2s;
         }
+        .muni-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(46,170,220,0.1); }
+        .muni-card h3 { font-size: 1.1rem; color: #fff; margin-bottom: 0.5rem; }
+        .muni-card .meta { font-size: 0.85rem; color: var(--text2); }
+        .muni-card .pop { color: var(--accent); font-weight: 600; }
 
-        .muni-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(46,170,220,0.1);
-        }
-
-        .muni-card h3 {
-            font-size: 1.1rem;
-            color: #fff;
-            margin-bottom: 0.5rem;
-        }
-
-        .muni-card .meta {
-            font-size: 0.85rem;
-            color: var(--text2);
-        }
-
-        .muni-card .pop {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        /* ============ DETAIL MODAL ============ */
         #detail-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.75);
-            z-index: 100;
-            display: none;
-            align-items: center;
-            justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75); z-index: 100; display: none;
+            align-items: center; justify-content: center;
         }
-
-        #detail-overlay.show {
-            display: flex;
-        }
-
+        #detail-overlay.show { display: flex; }
         #detail-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            width: 95%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 2rem;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 24px; width: 95%; max-width: 800px;
+            max-height: 90vh; overflow-y: auto; padding: 2rem;
         }
+        #detail-box h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #fff; margin-bottom: 0.5rem; }
+        #detail-box .close-btn { float: right; background: none; border: none; color: var(--text2); font-size: 28px; cursor: pointer; }
+        #detail-box .close-btn:hover { color: #fff; }
 
-        #detail-box h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            color: #fff;
-            margin-bottom: 0.5rem;
-        }
-
-        #detail-box .close-btn {
-            float: right;
-            background: none;
-            border: none;
-            color: var(--text2);
-            font-size: 28px;
-            cursor: pointer;
-        }
-
-        #detail-box .close-btn:hover {
-            color: #fff;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-
-        @media (max-width: 600px) {
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+        @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
         .info-item {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 1rem;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 1rem;
         }
+        .info-item .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text2); margin-bottom: 0.25rem; }
+        .info-item .value { font-size: 1.2rem; font-weight: 700; color: #fff; }
+        .info-item .value.highlight { color: var(--accent); }
 
-        .info-item .label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text2);
-            margin-bottom: 0.25rem;
-        }
-
-        .info-item .value {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .info-item .value.highlight {
-            color: var(--accent);
-        }
-
-        /* ============ MAP IMAGE ============ */
         .map-image {
-            width: 100%;
-            height: 250px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            object-fit: cover;
-            margin: 1.5rem 0;
-            background: #0a0f14;
+            width: 100%; height: 250px; border-radius: var(--radius);
+            border: 1px solid var(--border); object-fit: cover;
+            margin: 1.5rem 0; background: #0a0f14;
         }
 
-        /* ============ ACCORDION ============ */
-        .accordion {
-            margin: 1rem 0;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            overflow: hidden;
-        }
-
+        .accordion { margin: 1rem 0; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
         .accordion-header {
-            padding: 1rem 1.25rem;
-            background: rgba(255,255,255,0.02);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
-            user-select: none;
+            padding: 1rem 1.25rem; background: rgba(255,255,255,0.02);
+            cursor: pointer; display: flex; justify-content: space-between;
+            align-items: center; font-weight: 600; user-select: none;
         }
+        .accordion-header:hover { background: rgba(255,255,255,0.04); }
+        .accordion-header .arrow { transition: transform 0.2s; }
+        .accordion-header.open .arrow { transform: rotate(180deg); }
+        .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+        .accordion-body.open { max-height: 2000px; }
 
-        .accordion-header:hover {
-            background: rgba(255,255,255,0.04);
-        }
-
-        .accordion-header .arrow {
-            transition: transform 0.2s;
-        }
-
-        .accordion-header.open .arrow {
-            transform: rotate(180deg);
-        }
-
-        .accordion-body {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.35s ease;
-        }
-
-        .accordion-body.open {
-            max-height: 2000px;
-        }
-
-        /* ============ TABLES ============ */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th {
-            text-align: left;
-            padding: 10px 12px;
-            background: rgba(255,255,255,0.03);
-            color: var(--text2);
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            border-bottom: 1px solid var(--border);
+            text-align: left; padding: 10px 12px; background: rgba(255,255,255,0.03);
+            color: var(--text2); font-size: 0.7rem; text-transform: uppercase;
+            letter-spacing: 0.6px; border-bottom: 1px solid var(--border);
         }
-
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-        }
-
+        td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); }
         .badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            display: inline-block; padding: 3px 10px; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 600;
         }
-
         .badge-psd { background: rgba(46,170,220,0.2); color: #38bdf8; }
         .badge-pt { background: rgba(231,76,60,0.2); color: #e74c3c; }
         .badge-pl { background: rgba(52,152,219,0.2); color: #3498db; }
@@ -495,26 +212,15 @@
         .badge-mdb { background: rgba(243,156,18,0.2); color: #f39c12; }
         .badge-default { background: rgba(255,255,255,0.05); color: #8899aa; }
 
-        /* ============ FOOTER ============ */
-        .footer {
-            text-align: center;
-            padding: 2rem;
-            border-top: 1px solid var(--border);
-            color: var(--text2);
-            font-size: 0.85rem;
-        }
-
-        /* ============ SCROLLBAR ============ */
+        .footer { text-align: center; padding: 2rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<!-- ==================== HERO ==================== -->
 <section class="hero" id="hero-page">
     <div class="hero-icon">🏛️</div>
     <h1>Raio‑X <span>Político</span><br>do Paraná</h1>
@@ -523,7 +229,6 @@
         vereadores e a votação completa para deputados estaduais e federais.
     </p>
 
-    <!-- Governor Card -->
     <div class="governor-card">
         <div class="governor-avatar">👤</div>
         <div class="governor-info">
@@ -539,7 +244,6 @@
         </div>
     </div>
 
-    <!-- Stats -->
     <div class="stats-row">
         <div class="stat-card">
             <span class="stat-number">11.890.517</span>
@@ -559,7 +263,6 @@
         </div>
     </div>
 
-    <!-- History -->
     <div class="section" style="margin-top: 2rem;">
         <h2>Um Pouco da Nossa História</h2>
         <div class="history-text">
@@ -581,7 +284,6 @@
         </div>
     </div>
 
-    <!-- CTA -->
     <div style="margin: 3rem 0;">
         <button class="btn" onclick="showMuniPage()">
             📋 Conheça os 399 Municípios
@@ -593,7 +295,6 @@
     </div>
 </section>
 
-<!-- ==================== MUNICIPALITY PAGE ==================== -->
 <section class="muni-page" id="muni-page">
     <div class="muni-header">
         <h2>📍 399 Municípios do Paraná</h2>
@@ -610,7 +311,6 @@
     </div>
 </section>
 
-<!-- ==================== DETAIL OVERLAY ==================== -->
 <div id="detail-overlay">
     <div id="detail-box">
         <button class="close-btn" onclick="closeDetail()">✕</button>
@@ -618,7 +318,6 @@
     </div>
 </div>
 
-<!-- Leaflet CSS (apenas para compatibilidade) -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ============ CONFIGURAÇÃO ============
@@ -632,6 +331,7 @@ var municipios = [];
 var vereadoresData = {};
 var depEstData = {};
 var depFedData = {};
+var complementData = {}; // armazena prefeito + vereadores com votos
 
 // ============ UTILITÁRIOS ============
 function formatNumber(val) {
@@ -641,10 +341,7 @@ function formatNumber(val) {
 }
 
 function getBadgeClass(partido) {
-    var map = {
-        'PSD': 'badge-psd', 'PT': 'badge-pt', 'PL': 'badge-pl',
-        'PP': 'badge-pp', 'MDB': 'badge-mdb'
-    };
+    var map = { 'PSD': 'badge-psd', 'PT': 'badge-pt', 'PL': 'badge-pl', 'PP': 'badge-pp', 'MDB': 'badge-mdb' };
     return map[partido] || 'badge-default';
 }
 
@@ -660,7 +357,7 @@ function showHeroPage() {
     document.getElementById('muni-page').classList.remove('active');
 }
 
-// ============ RENDERIZAR GRADE DE MUNICÍPIOS ============
+// ============ GRADE DE MUNICÍPIOS ============
 function renderMuniGrid(data) {
     var grid = document.getElementById('muni-grid');
     if (!data.length) {
@@ -679,7 +376,7 @@ function renderMuniGrid(data) {
     grid.innerHTML = html;
 }
 
-// ============ BUSCA DE MUNICÍPIOS ============
+// ============ BUSCA ============
 document.addEventListener('DOMContentLoaded', function() {
     var searchInput = document.getElementById('muni-search');
     if (searchInput) {
@@ -703,37 +400,44 @@ function openDetail(numero) {
     var ver = vereadoresData[mun.municipio.toUpperCase()] || [];
     var est = depEstData[String(mun.numero)] || [];
     var fed = depFedData[String(mun.numero)] || [];
+    var extra = complementData[String(mun.numero)] || {}; // dados da API do UOL
 
-    // Mapa estático do OpenStreetMap (ou Google Maps)
     var mapUrl = 'https://staticmap.openstreetmap.de/staticmap.php?center=' +
         mun.lat + ',' + mun.lng + '&zoom=12&size=800x250&maptype=mapnik';
 
     var html = '<h2>' + mun.municipio + ' <span style="color:var(--text2); font-size:0.9rem;">Nº ' + mun.numero + '</span></h2>';
 
-    // Imagem do mapa
     html += '<img class="map-image" src="' + mapUrl + '" alt="Mapa de ' + mun.municipio + '" onerror="this.style.display=\'none\'">';
 
-    // Info grid
     html += '<div class="info-grid">' +
         '<div class="info-item"><div class="label">👥 População Estimada (IBGE 2025)</div><div class="value highlight">' + formatNumber(mun.populacao) + '</div></div>' +
-        '<div class="info-item"><div class="label">🗳️ Eleitores (TSE 2024)</div><div class="value" style="color:var(--amber);">' + formatNumber(mun.eleitores) + '</div></div>' +
-        '<div class="info-item"><div class="label">🏛️ Prefeito(a) 2025-2028</div><div class="value">' + (mun.prefeito || 'Não informado') + '</div></div>' +
-        '<div class="info-item"><div class="label">📍 Coordenadas</div><div class="value" style="font-size:0.85rem;">Lat: ' + (mun.lat ? mun.lat.toFixed(4) : 'N/A') + ' · Lng: ' + (mun.lng ? mun.lng.toFixed(4) : 'N/A') + '</div></div>' +
+        '<div class="info-item"><div class="label">🗳️ Eleitores (TSE 2024)</div><div class="value" style="color:var(--amber);">' + formatNumber(mun.eleitores) + '</div></div>';
+
+    // Prefeito com partido e votação (se disponível)
+    var prefeitoNome = mun.prefeito || extra.prefeito_nome || 'Não informado';
+    var prefeitoPartido = extra.prefeito_partido || '';
+    var prefeitoVotos = extra.prefeito_votos || null;
+
+    html += '<div class="info-item">' +
+        '<div class="label">🏛️ Prefeito(a) 2025-2028</div>' +
+        '<div class="value" style="font-size:1.1rem;">' + prefeitoNome +
+            (prefeitoPartido ? ' <span class="badge ' + getBadgeClass(prefeitoPartido) + '">' + prefeitoPartido + '</span>' : '') +
+        '</div>' +
+        (prefeitoVotos !== null ? '<div style="margin-top:4px; color:var(--text2);">🗳️ Votação: <strong>' + formatNumber(prefeitoVotos) + '</strong> votos</div>' : '') +
     '</div>';
 
-    // Accordion: Vereadores
-    html += buildAccordion('👤 Vereadores (' + ver.length + ')', buildVereadoresTable(ver));
+    html += '<div class="info-item"><div class="label">📍 Coordenadas</div><div class="value" style="font-size:0.85rem;">Lat: ' + (mun.lat ? mun.lat.toFixed(4) : 'N/A') + ' · Lng: ' + (mun.lng ? mun.lng.toFixed(4) : 'N/A') + '</div></div>' +
+    '</div>';
 
-    // Accordion: Deputados Estaduais
+    // Accordion: Vereadores (com votos do UOL, se disponível)
+    var verHtml = buildVereadoresTable(ver, extra.vereadores || []);
+    html += buildAccordion('👤 Vereadores (' + ver.length + ')', verHtml);
+
     html += buildAccordion('📊 Deputados Estaduais (' + est.length + ' candidatos)', buildDeputadosTable(est));
-
-    // Accordion: Deputados Federais
     html += buildAccordion('🏛️ Deputados Federais (' + fed.length + ' candidatos)', buildDeputadosTable(fed));
 
     document.getElementById('detail-content').innerHTML = html;
     document.getElementById('detail-overlay').classList.add('show');
-
-    // Reativar accordions
     setTimeout(initAccordions, 100);
 }
 
@@ -741,7 +445,6 @@ function closeDetail() {
     document.getElementById('detail-overlay').classList.remove('show');
 }
 
-// ============ ACCORDION ============
 function buildAccordion(title, bodyHtml) {
     return '<div class="accordion">' +
         '<div class="accordion-header" onclick="toggleAccordion(this)">' +
@@ -771,18 +474,33 @@ function initAccordions() {
 }
 
 // ============ TABELAS ============
-function buildVereadoresTable(list) {
+function buildVereadoresTable(list, extraVereadores) {
     if (!list.length) return '<p style="color:var(--text2); padding:1rem;">Dados não disponíveis.</p>';
-    var html = '<table><thead><tr><th>Nome</th><th>Partido</th><th>Nº</th><th>Situação</th></tr></thead><tbody>';
+
+    // Cria um mapa dos votos extras (chave = nome + partido)
+    var votosMap = {};
+    extraVereadores.forEach(function(v) {
+        votosMap[v.nome + '|' + v.partido] = v.votos;
+    });
+
+    var html = '<table><thead><tr><th>Nome</th><th>Partido</th><th>Nº</th><th>Votos</th><th>Situação</th></tr></thead><tbody>';
     list.forEach(function(v) {
-        html += '<tr><td>' + v.nome + '</td><td><span class="badge ' + getBadgeClass(v.partido) + '">' + v.partido + '</span></td><td>' + v.numero + '</td><td>' + (v.situacao || 'Eleito') + '</td></tr>';
+        var chave = v.nome + '|' + v.partido;
+        var votos = votosMap[chave] || 'N/D';
+        html += '<tr>' +
+            '<td>' + v.nome + '</td>' +
+            '<td><span class="badge ' + getBadgeClass(v.partido) + '">' + v.partido + '</span></td>' +
+            '<td>' + v.numero + '</td>' +
+            '<td style="font-weight:600;">' + (typeof votos === 'number' ? formatNumber(votos) : votos) + '</td>' +
+            '<td>' + (v.situacao || 'Eleito') + '</td>' +
+        '</tr>';
     });
     html += '</tbody></table>';
     return html;
 }
 
 function buildDeputadosTable(list) {
-    if (!list.length) return '<p style="color:var(--text2); padding:1rem;">Nenhum candidato encontrado para este município.</p>';
+    if (!list.length) return '<p style="color:var(--text2); padding:1rem;">Nenhum candidato encontrado.</p>';
     var html = '<table><thead><tr><th>Nome</th><th>Partido</th><th>Nº</th><th>Votos</th><th>Status</th></tr></thead><tbody>';
     list.forEach(function(d) {
         html += '<tr>' +
@@ -797,7 +515,51 @@ function buildDeputadosTable(list) {
     return html;
 }
 
-// ============ CARREGAR DADOS ============
+// ============ CARREGAR DADOS COMPLEMENTARES (API UOL) ============
+async function loadComplementData() {
+    console.log('🔍 Buscando dados complementares do UOL...');
+    var promises = municipios.map(function(mun) {
+        var nome = mun.municipio
+            .toLowerCase()
+            .replace(/ /g, '-')
+            .replace(/[áàãâ]/g, 'a')
+            .replace(/[éê]/g, 'e')
+            .replace(/[í]/g, 'i')
+            .replace(/[óôõ]/g, 'o')
+            .replace(/[ú]/g, 'u')
+            .replace(/[ç]/g, 'c')
+            .replace(/[^a-z0-9-]/g, '');
+        var url = 'https://noticias.uol.com.br/eleicoes/2024/apuracao/json/PR/' + nome + '.json';
+        return fetch(url)
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data && data.candidatos_prefeito) {
+                    var prefeito = data.candidatos_prefeito.find(function(c) { return c.eleito; }) || data.candidatos_prefeito[0];
+                    var vereadoresList = (data.candidatos_vereador || []).filter(function(v) { return v.eleito; });
+                    complementData[String(mun.numero)] = {
+                        prefeito_nome: prefeito.nome_urna || prefeito.nome,
+                        prefeito_partido: prefeito.partido_sigla,
+                        prefeito_votos: Number(prefeito.votos_total || prefeito.votos),
+                        vereadores: vereadoresList.map(function(v) {
+                            return {
+                                nome: v.nome_urna || v.nome,
+                                partido: v.partido_sigla,
+                                votos: Number(v.votos_total || v.votos)
+                            };
+                        })
+                    };
+                }
+            })
+            .catch(function(err) {
+                console.warn('⚠️ Não foi possível obter dados para ' + mun.municipio + ':', err.message);
+            });
+    });
+
+    await Promise.allSettled(promises);
+    console.log('✅ Dados complementares carregados para', Object.keys(complementData).length, 'municípios.');
+}
+
+// ============ INICIALIZAÇÃO ============
 async function loadData() {
     try {
         var responses = await Promise.all([
@@ -817,11 +579,9 @@ async function loadData() {
             .map(function(f) {
                 var popOriginal = Number(f.properties.populacao) || 0;
                 var eleitores = Number(f.properties.eleitores) || 0;
-                // Correção de população truncada
                 if (popOriginal < 1000 && popOriginal > 0 && eleitores > 100) {
                     while (popOriginal < eleitores && popOriginal < 10000000) popOriginal *= 10;
                 }
-
                 return {
                     numero: f.properties.numero,
                     municipio: f.properties.municipio || 'N/A',
@@ -834,9 +594,14 @@ async function loadData() {
             })
             .sort(function(a, b) { return a.numero - b.numero; });
 
-        console.log('✅ Dados carregados: ' + municipios.length + ' municípios');
+        console.log('✅ Municípios carregados:', municipios.length);
 
-        // Pré-renderizar a grade (oculta)
+        // Carrega dados complementares em segundo plano
+        loadComplementData().then(function() {
+            console.log('📊 Dados complementares integrados.');
+        });
+
+        // Pré-renderiza a grade (oculta)
         renderMuniGrid(municipios);
     } catch (err) {
         console.error('❌ Erro ao carregar dados:', err);
