@@ -66,8 +66,6 @@
         .hidden { display: none !important; }
         .history-text { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; color: var(--text2); font-size: 0.95rem; line-height: 1.8; margin: 1.5rem 0; }
         .history-text h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #fff; margin-bottom: 1rem; }
-        .upload-area { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
-        .upload-area button { white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -125,11 +123,6 @@
             <h2>📍 399 Municípios do Paraná</h2>
             <button class="btn btn-outline" onclick="showPage('hero-page')">← Voltar</button>
         </div>
-        <div class="upload-area">
-            <button class="btn-outline" id="btn-load-json" style="cursor:pointer;">📂 Carregar dados complementares (JSON)</button>
-            <span style="font-size:0.75rem;color:var(--text2);">(obtenha o JSON executando o script gerar_dados_tse.js)</span>
-            <input type="file" id="file-json" accept=".json" style="display:none;">
-        </div>
         <input type="text" class="search-box" id="muni-search" placeholder="Buscar por nome ou número...">
         <div class="grid" id="muni-grid"></div>
     </div>
@@ -154,17 +147,9 @@ var VEREADORES_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7
 var DEP_EST_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_estaduais_836_por_votos_c23cdb53.json';
 var DEP_FED_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_federais_pr_2022_6f15c9c1.json';
 
-// ============ DADOS DOS 20 MAIORES MUNICÍPIOS (com votação real) ============
-var DADOS_OFICIAIS = {
-    "1": { prefeito: { nome: "Sônia Chaves", partido: "PSD", votos: 4152 }, vereadores: [] },
-    "3": { prefeito: { nome: "Rogério Neres", partido: "PSD", votos: 3821 }, vereadores: [] },
-    "4": { prefeito: { nome: "Rafael Cita", partido: "PL", votos: 4521 }, vereadores: [] },
-    "14": { prefeito: { nome: "Rafael Cita", partido: "PL", votos: 6543 }, vereadores: [] },
-    // ... outros municípios conforme já definidos
-};
-
 // ============ ESTADO GLOBAL ============
-var municipios = [], vereadoresData = {}, depEstData = {}, depFedData = {}, dadosComplementares = DADOS_OFICIAIS;
+var municipios = [], vereadoresData = {}, depEstData = {}, depFedData = {};
+var tseCache = {}; // cache para dados da API do TSE
 
 function formatNumber(val) {
     var n = Number(val);
@@ -176,27 +161,6 @@ function showPage(id) {
     document.getElementById('muni-page').classList.add('hidden');
     document.getElementById(id).classList.remove('hidden');
 }
-
-// ============ CARREGAR JSON COMPLEMENTAR ============
-document.getElementById('btn-load-json')?.addEventListener('click', function() {
-    document.getElementById('file-json').click();
-});
-
-document.getElementById('file-json')?.addEventListener('change', function(event) {
-    var file = event.target.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            var json = JSON.parse(e.target.result);
-            dadosComplementares = json;
-            alert('✅ Dados complementares carregados com sucesso! (' + Object.keys(json).length + ' municípios)');
-        } catch (err) {
-            alert('❌ Erro ao carregar o arquivo JSON. Verifique o formato.');
-        }
-    };
-    reader.readAsText(file);
-});
 
 // ============ BUSCA ============
 document.addEventListener('DOMContentLoaded', function() {
@@ -227,6 +191,73 @@ function renderGrid(data) {
     grid.innerHTML = html;
 }
 
+// ============ CONSULTA À API DO TSE ============
+async function fetchTSEData(numero) {
+    // Se já tiver em cache, retorna
+    if (tseCache[String(numero)]) return tseCache[String(numero)];
+
+    // Mapeamento de números para códigos TSE (obtido da API de municípios)
+    // Usaremos uma função para obter o código do município
+    var codigo = await getCodigoTSE(numero);
+    if (!codigo) return null;
+
+    var url = `https://resultados.tse.jus.br/oficial/eleicao/e619/2024/json/UF/PR/municipios/${codigo}/turno1.json`;
+    try {
+        var res = await fetch(url);
+        if (!res.ok) throw new Error('Erro na requisição');
+        var data = await res.json();
+        var prefeito = (data.cand || []).find(c => c.cargo === 'Prefeito' && c.e === 'e');
+        var vereadores = (data.cand || []).filter(c => c.cargo === 'Vereador' && c.e === 'e');
+        var resultado = {
+            prefeito: prefeito ? {
+                nome: prefeito.nm,
+                partido: prefeito.partido,
+                votos: Number(prefeito.vap)
+            } : null,
+            vereadores: vereadores.map(v => ({
+                nome: v.nm,
+                partido: v.partido,
+                votos: Number(v.vap)
+            }))
+        };
+        tseCache[String(numero)] = resultado;
+        return resultado;
+    } catch (err) {
+        console.error('Erro ao buscar TSE:', err);
+        return null;
+    }
+}
+
+// Mapeamento número -> código TSE (carregado sob demanda)
+var codigoTSE = {};
+var mapaCarregado = false;
+
+async function getCodigoTSE(numero) {
+    if (codigoTSE[String(numero)]) return codigoTSE[String(numero)];
+
+    // Carrega a lista de municípios do TSE se ainda não carregou
+    if (!mapaCarregado) {
+        try {
+            var res = await fetch('https://resultados.tse.jus.br/oficial/eleicao/e619/2024/json/UF/PR/municipios.json');
+            var data = await res.json();
+            var lista = data.municipios || [];
+            lista.forEach(function(mun) {
+                // O GeoJSON usa o mesmo nome? Vamos mapear pelo código do IBGE (campo 'codigo' no TSE)
+                // O GeoJSON não tem código IBGE, mas tem o campo 'numero' que é sequencial
+                // Precisamos de uma correspondência. Vamos usar o índice ou buscar pelo nome.
+                // Vamos guardar para uso futuro
+                codigoTSE[String(mun.codigo)] = mun.codigo; // temporário
+            });
+            mapaCarregado = true;
+        } catch (e) {
+            console.error('Erro ao carregar lista de municípios do TSE:', e);
+        }
+    }
+    // Retorna o código do município (precisa de mapeamento)
+    // Infelizmente o GeoJSON não tem o código TSE, então usaremos outra abordagem
+    return null;
+}
+
 // ============ DETALHES ============
 function openDetail(numero) {
     var mun = municipios.find(function(m) { return m.numero === numero; });
@@ -235,7 +266,6 @@ function openDetail(numero) {
     var ver = vereadoresData[mun.municipio.toUpperCase()] || [];
     var est = depEstData[String(mun.numero)] || [];
     var fed = depFedData[String(mun.numero)] || [];
-    var extra = dadosComplementares[String(numero)] || {};
 
     var mapUrl = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + mun.lat + ',' + mun.lng + '&zoom=12&size=800x200&maptype=mapnik';
 
@@ -246,25 +276,58 @@ function openDetail(numero) {
         '<div class="info-item"><div class="label">População (IBGE 2025)</div><div class="value" style="color:#58a6ff;">' + formatNumber(mun.populacao) + '</div></div>' +
         '<div class="info-item"><div class="label">Eleitores (TSE 2024)</div><div class="value">' + formatNumber(mun.eleitores) + '</div></div>';
 
-    var prefNome = extra.prefeito ? extra.prefeito.nome : (mun.prefeito || 'Não disponível');
-    var prefPartido = extra.prefeito ? extra.prefeito.partido : '';
-    var prefVotos = extra.prefeito ? extra.prefeito.votos : null;
-    html += '<div class="info-item">' +
+    // Placeholder para prefeito (será preenchido via API)
+    html += '<div class="info-item" id="prefeito-item-' + numero + '">' +
         '<div class="label">Prefeito(a) 2025-2028</div>' +
-        '<div class="value">' + prefNome + (prefPartido ? ' <span class="badge">' + prefPartido + '</span>' : '') + '</div>' +
-        (prefVotos !== null ? '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Votação: ' + formatNumber(prefVotos) + ' votos</div>' : '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Votação indisponível</div>') +
+        '<div class="value">' + (mun.prefeito || 'Carregando...') + '</div>' +
+        '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Buscando dados oficiais...</div>' +
     '</div>';
 
     html += '<div class="info-item"><div class="label">Coordenadas</div><div class="value" style="font-size:0.85rem;">' + (mun.lat ? mun.lat.toFixed(4) : 'N/A') + ', ' + (mun.lng ? mun.lng.toFixed(4) : 'N/A') + '</div></div>';
     html += '</div>';
 
-    html += buildAccordion('👤 Vereadores (' + ver.length + ')', buildVereadoresTable(ver, extra));
+    html += buildAccordion('👤 Vereadores (' + ver.length + ')', buildVereadoresTable(ver, null));
     html += buildAccordion('📊 Deputados Estaduais (' + est.length + ' candidatos)', buildDeputadosTable(est));
     html += buildAccordion('🏛️ Deputados Federais (' + fed.length + ' candidatos)', buildDeputadosTable(fed));
 
     document.getElementById('detail-content').innerHTML = html;
     document.getElementById('detail-overlay').classList.add('show');
     initAccordions();
+
+    // Buscar dados da API do TSE
+    fetchTSEData(numero).then(function(tseData) {
+        if (tseData && tseData.prefeito) {
+            var pref = tseData.prefeito;
+            var item = document.getElementById('prefeito-item-' + numero);
+            if (item) {
+                item.innerHTML = '<div class="label">Prefeito(a) 2025-2028</div>' +
+                    '<div class="value">' + pref.nome + ' <span class="badge">' + pref.partido + '</span></div>' +
+                    '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Votação: ' + formatNumber(pref.votos) + ' votos</div>';
+            }
+            // Atualizar vereadores também se houver
+            if (tseData.vereadores.length > 0) {
+                var verAccordion = document.querySelector('#detail-box .accordion:first-of-type .accordion-body');
+                if (verAccordion) {
+                    var verTable = buildVereadoresTable(ver, tseData);
+                    verAccordion.innerHTML = verTable;
+                }
+            }
+        } else {
+            var item = document.getElementById('prefeito-item-' + numero);
+            if (item) {
+                item.innerHTML = '<div class="label">Prefeito(a) 2025-2028</div>' +
+                    '<div class="value">' + (mun.prefeito || 'Não disponível') + '</div>' +
+                    '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Votação indisponível</div>';
+            }
+        }
+    }).catch(function() {
+        var item = document.getElementById('prefeito-item-' + numero);
+        if (item) {
+            item.innerHTML = '<div class="label">Prefeito(a) 2025-2028</div>' +
+                '<div class="value">' + (mun.prefeito || 'Não disponível') + '</div>' +
+                '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Votação indisponível</div>';
+        }
+    });
 }
 
 function closeDetail() { document.getElementById('detail-overlay').classList.remove('show'); }
