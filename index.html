@@ -1,397 +1,414 @@
-DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Paraná – Raio-X Político por Município</title>
-    <!-- Leaflet CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paraná – Raio-X Político</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
-        /* ---------- RESET & BASE ---------- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body, html { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: #f4f7fb; color: #1e293b; }
-        #map { width: 100vw; height: 100vh; z-index: 1; }
-
-        /* ---------- BARRA LATERAL ESQUERDA ---------- */
-        #sidebar {
-            position: absolute; top: 0; left: 0; width: 380px; height: 100vh;
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            box-shadow: 4px 0 30px rgba(0, 20, 10, 0.08); z-index: 20; display: flex; flex-direction: column;
-            transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1); border-right: 1px solid rgba(255, 255, 255, 0.3);
+        body, html { width: 100%; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; }
+        #map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+        #panel {
+            position: absolute; top: 20px; left: 20px; z-index: 10;
+            width: 350px; max-height: calc(100vh - 40px);
+            background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column; overflow: hidden;
         }
-        #sidebar.hidden { transform: translateX(-100%); }
-
-        #toggle-sidebar {
-            position: absolute; top: 20px; left: 380px; z-index: 30;
-            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.5); border-left: none; border-radius: 0 16px 16px 0;
-            width: 36px; height: 56px; display: flex; align-items: center; justify-content: center; cursor: pointer;
-            box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.05); transition: all 0.35s; color: #0f4c2f; font-size: 20px;
+        #panel-header { padding: 16px; background: #166534; color: white; }
+        #panel-header h2 { font-size: 20px; margin-bottom: 4px; }
+        #panel-header p { font-size: 12px; opacity: 0.9; }
+        #search-input {
+            margin: 12px; padding: 10px 14px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 14px; width: calc(100% - 24px);
         }
-        #toggle-sidebar:hover { background: white; }
-        #sidebar.hidden + #toggle-sidebar { left: 0; }
-
-        .sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .logo-area { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-        .logo-icon {
-            width: 48px; height: 48px; background: linear-gradient(145deg, #0f4c2f, #1b6e43); border-radius: 16px;
-            display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;
-            box-shadow: 0 8px 16px -6px rgba(15, 76, 47, 0.2);
+        #city-list { flex: 1; overflow-y: auto; padding: 0 8px 8px; }
+        .city-item {
+            padding: 10px 12px; cursor: pointer; border-radius: 8px;
+            margin-bottom: 2px; display: flex; align-items: center; gap: 10px;
         }
-        .logo-text h1 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 26px; color: #0f4c2f; line-height: 1.1; }
-        .logo-text p { font-size: 11px; color: #5b7a6b; font-weight: 500; }
-        .stats-cards { display: flex; gap: 12px; margin: 18px 0 16px; }
-        .stat-card {
-            flex: 1; padding: 14px 10px; border-radius: 20px; background: rgba(240, 253, 244, 0.6);
-            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.6);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.02); transition: transform 0.15s;
+        .city-item:hover { background: #f0f0f0; }
+        .city-item.active { background: #dcfce7; }
+        .city-num {
+            width: 32px; height: 32px; background: #e5e7eb; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 13px; flex-shrink: 0;
         }
-        .stat-card.amber { background: rgba(255, 251, 235, 0.7); }
-        .stat-card:hover { transform: translateY(-2px); }
-        .stat-label { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; text-transform: uppercase; color: #4b6b5a; margin-bottom: 8px; }
-        .stat-value { font-weight: 700; font-size: 22px; }
-        .stat-card .stat-value { color: #0f4c2f; }
-        .stat-card.amber .stat-value { color: #9a4d0e; }
-
-        .search-wrapper { position: relative; margin-top: 8px; }
-        .search-wrapper input {
-            width: 100%; padding: 14px 18px 14px 48px; border: 1px solid rgba(255,255,255,0.8); border-radius: 30px;
-            font-size: 14px; background: rgba(255,255,255,0.7); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-            outline: none; color: #1e293b; box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-        }
-        .search-wrapper input:focus { border-color: #2b8c5e; background: rgba(255,255,255,0.95); }
-        .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #5b8c75; font-size: 18px; }
-        .clear-search {
-            position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none;
-            color: #7e9a8f; cursor: pointer; font-size: 18px; display: none; width: 24px; height: 24px; border-radius: 50%;
+        .city-item.active .city-num { background: #166534; color: white; }
+        .city-name { font-weight: bold; font-size: 14px; }
+        .city-info-text { font-size: 12px; color: #666; }
+        #detail-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 100; display: none;
             align-items: center; justify-content: center;
         }
-        .clear-search:hover { background: rgba(0,0,0,0.05); }
-        .search-wrapper input:not(:placeholder-shown) ~ .clear-search { display: flex; }
-        .result-count { font-size: 11px; color: #628a78; margin-top: 10px; padding-left: 6px; }
-
-        #city-list-container { flex: 1; overflow-y: auto; padding: 8px 12px 20px; }
-        .city-item {
-            display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 18px; cursor: pointer;
-            transition: all 0.2s; margin-bottom: 4px; border: 1px solid transparent;
+        #detail-overlay.show { display: flex; }
+        #detail-box {
+            background: white; border-radius: 16px; width: 90%; max-width: 600px;
+            max-height: 85vh; overflow-y: auto; padding: 24px;
         }
-        .city-item:hover { background: rgba(255,255,255,0.6); backdrop-filter: blur(2px); transform: scale(1.01); }
-        .city-item.active { background: linear-gradient(105deg, rgba(240, 253, 244, 0.9), white); border-color: #bbf7d0; }
-        .city-number {
-            width: 40px; height: 40px; background: #edf4f1; border-radius: 14px; display: flex; align-items: center;
-            justify-content: center; font-weight: 700; font-size: 15px; color: #2e5a48; flex-shrink: 0;
+        #detail-box h2 { font-size: 24px; margin-bottom: 16px; color: #166534; }
+        #detail-box .info-row {
+            display: flex; justify-content: space-between; padding: 12px 0;
+            border-bottom: 1px solid #eee;
         }
-        .city-item.active .city-number { background: #0f4c2f; color: white; }
-        .city-info { flex: 1; }
-        .city-name { font-weight: 600; font-size: 15px; color: #1a2e26; }
-        .city-meta { font-size: 11px; color: #618a7a; margin-top: 4px; }
-        .city-chevron { color: #a8c3b7; font-size: 20px; }
-        .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(0,0,0,0.05); font-size: 10px; color: #7b9b8d; text-align: center; }
-
-        /* ---------- PAINEL DETALHES DIREITO ---------- */
-        #detail-panel {
-            position: absolute; top: 0; right: 0; width: 460px; height: 100vh; background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: -4px 0 30px rgba(0,20,10,0.06);
-            z-index: 20; transform: translateX(100%); transition: transform 0.4s; display: flex; flex-direction: column;
-            border-left: 1px solid rgba(255,255,255,0.5);
+        #detail-box .info-label { font-weight: bold; color: #555; }
+        #detail-box .info-value { font-weight: bold; font-size: 18px; }
+        .section-title {
+            font-size: 18px; font-weight: bold; margin: 20px 0 12px;
+            padding-bottom: 8px; border-bottom: 2px solid #166534;
         }
-        #detail-panel.visible { transform: translateX(0); }
-        .detail-header { position: relative; padding: 30px 26px 24px; color: white; min-height: 150px; background-size: cover; }
-        .close-detail {
-            position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; border-radius: 40px;
-            background: rgba(255,255,255,0.25); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.3);
-            color: white; font-size: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { text-align: left; padding: 8px; background: #f0f0f0; font-size: 13px; }
+        td { padding: 8px; border-bottom: 1px solid #eee; font-size: 13px; }
+        .close-btn {
+            float: right; background: none; border: none; font-size: 24px;
+            cursor: pointer; color: #999;
         }
-        .detail-badge { background: rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 40px; font-size: 13px; display: inline-block; margin-bottom: 10px; }
-        .detail-city-name { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; }
-        .detail-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 24px 26px;
-            max-height: calc(100vh - 200px); /* garante que o conteúdo não ultrapasse */
-            scrollbar-width: thin;
+        .close-btn:hover { color: #333; }
+        #toggle-btn {
+            position: absolute; top: 24px; left: 380px; z-index: 10;
+            background: white; border: none; border-radius: 0 8px 8px 0;
+            padding: 12px 8px; cursor: pointer; box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+            font-weight: bold; color: #166534;
         }
-        .card {
-            background: rgba(255,255,255,0.7); backdrop-filter: blur(4px); border-radius: 28px; padding: 22px;
-            border: 1px solid rgba(255,255,255,0.8); margin-bottom: 20px;
+        .hidden { display: none !important; }
+        .party-tag {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 11px; font-weight: bold; margin-right: 4px;
+            color: white;
         }
-        .card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
-        .card-icon { width: 48px; height: 48px; border-radius: 18px; display: flex; align-items: center; justify-content: center; color: white; }
-        .big-number { font-size: 38px; font-weight: 700; }
-        .accordion {
-            border-radius: 24px; border: 1px solid rgba(255,255,255,0.6); overflow: hidden; margin-bottom: 20px;
-            background: rgba(255,255,255,0.5); backdrop-filter: blur(4px);
-        }
-        .accordion-header {
-            padding: 18px 22px; background: rgba(255,255,255,0.4); display: flex; justify-content: space-between;
-            cursor: pointer; user-select: none;
-        }
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.35s ease;
-            background: rgba(255,255,255,0.3);
-        }
-        .accordion-content.open {
-            max-height: none;        /* sem limite de altura */
-            overflow-y: visible;
-        }
-        .filter-bar { padding: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
-        .filter-btn {
-            padding: 6px 16px; border-radius: 30px; font-size: 12px; background: white; border: 1px solid #e2e8f0; cursor: pointer;
-        }
-        .filter-btn.active { background: #0f4c2f; color: white; }
-        .deputy-item { padding: 14px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #eee; }
-        .deputy-rank { width: 32px; height: 32px; border-radius: 32px; background: #eaf1ed; display: flex; align-items: center; justify-content: center; font-weight: 700; }
-        .deputy-info { flex: 1; }
-        .deputy-name { font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-        .deputy-party { display: inline-block; padding: 4px 10px; border-radius: 30px; font-size: 10px; font-weight: 700; }
-        .deputy-votes { font-weight: 700; }
-
-        #legend {
-            position: absolute; bottom: 28px; left: 28px; background: rgba(255,255,255,0.8); backdrop-filter: blur(12px);
-            padding: 18px 22px; border-radius: 28px; z-index: 15; border: 1px solid rgba(255,255,255,0.6);
-        }
-        #map-title {
-            position: absolute; top: 24px; right: 28px; background: rgba(255,255,255,0.8); backdrop-filter: blur(12px);
-            padding: 16px 26px; border-radius: 40px; z-index: 15; text-align: right;
-        }
-        .loading-overlay {
-            position: absolute; inset: 0; background: #f4f7fb; z-index: 100; display: flex; align-items: center; justify-content: center;
-        }
-        .spinner { width: 56px; height: 56px; border: 4px solid rgba(15,76,47,0.1); border-top-color: #0f4c2f; border-radius: 50%; animation: spin 1s infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Footer do painel sticky para não cobrir conteúdo */
-        #detail-panel .sidebar-footer {
-            position: sticky;
-            bottom: 0;
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(12px);
-            z-index: 2;
+        .corrected-badge {
+            background: #fef3c7; color: #92400e; font-size: 10px;
+            padding: 2px 6px; border-radius: 10px; margin-left: 6px;
         }
     </style>
 </head>
 <body>
-<div class="loading-overlay" id="loading"><div class="spinner"></div></div>
 
-<div id="sidebar">
-    <div class="sidebar-header">
-        <div class="logo-area">
-            <div class="logo-icon">📍</div>
-            <div class="logo-text"><h1>Paraná</h1><p>399 Municípios · Raio-X Político</p></div>
-        </div>
-        <div class="stats-cards">
-            <div class="stat-card"><div class="stat-label">👥 População</div><div class="stat-value" id="total-pop">--</div></div>
-            <div class="stat-card amber"><div class="stat-label">🗳️ Eleitores</div><div class="stat-value" id="total-eleit">--</div></div>
-        </div>
-        <div class="search-wrapper">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="search-input" placeholder="Buscar por nome, número ou prefeito...">
-            <button class="clear-search" id="clear-search">✕</button>
-        </div>
-        <div class="result-count" id="result-count"></div>
-    </div>
-    <div id="city-list-container"></div>
-    <div class="sidebar-footer">Fontes: IBGE (Est. 2025) · TSE (2022/2024)</div>
-</div>
-
-<button id="toggle-sidebar">◀</button>
 <div id="map"></div>
 
-<div id="legend">
-    <div style="font-weight:700; margin-bottom:12px;">📊 População</div>
-    <div id="legend-items"></div>
-</div>
-
-<div id="map-title">
-    <h2 style="font-family:'Playfair Display'; color:#0f4c2f;">Mapa Interativo do Paraná</h2>
-    <p style="color:#5b7a6b;">Dados Municipais 2022·2024·2025</p>
-</div>
-
-<div id="detail-panel">
-    <div class="detail-header" id="detail-header">
-        <button class="close-detail" id="close-detail">✕</button>
-        <span class="detail-badge" id="detail-badge"></span>
-        <h2 class="detail-city-name" id="detail-city-name"></h2>
+<div id="panel">
+    <div id="panel-header">
+        <h2>📍 Paraná</h2>
+        <p>399 Municípios · Raio-X Político</p>
     </div>
-    <div class="detail-content" id="detail-content"></div>
-    <div class="sidebar-footer">Dados oficiais: IBGE · TSE</div>
+    <input type="text" id="search-input" placeholder="Buscar município...">
+    <div id="city-list"></div>
+</div>
+
+<button id="toggle-btn" onclick="togglePanel()">◀</button>
+
+<div id="detail-overlay">
+    <div id="detail-box">
+        <button class="close-btn" onclick="closeDetail()">×</button>
+        <h2 id="detail-title"></h2>
+        <div id="detail-content"></div>
+    </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    (function(){
-        // URLs dos dados (originais do Manus)
-        const DATA_URLS = {
-            geojson: "https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/parana_municipios_2d5ac5bd.geojson",
-            vereadores: "https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/vereadores_pr_2024_66f520bf.json",
-            depEstaduais: "https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_estaduais_836_por_votos_c23cdb53.json",
-            depFederais: "https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_federais_pr_2022_6f15c9c1.json"
-        };
+// ============ CONFIGURAÇÃO ============
+var GEOJSON_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/parana_municipios_2d5ac5bd.geojson';
+var VEREADORES_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/vereadores_pr_2024_66f520bf.json';
+var DEP_EST_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_estaduais_836_por_votos_c23cdb53.json';
+var DEP_FED_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_federais_pr_2022_6f15c9c1.json';
 
-        // Estado global
-        let map, geojsonLayer;
-        let municipios = [];
-        let vereadoresData = {};
-        let depEstaduaisData = {};
-        let depFederaisData = {};
-        let selectedMunicipio = null;
-        let filteredMunicipios = [];
-
-        // UI elements
-        const sidebar = document.getElementById('sidebar');
-        const toggleBtn = document.getElementById('toggle-sidebar');
-        const cityListDiv = document.getElementById('city-list-container');
-        const searchInput = document.getElementById('search-input');
-        const clearSearchBtn = document.getElementById('clear-search');
-        const totalPopSpan = document.getElementById('total-pop');
-        const totalEleitSpan = document.getElementById('total-eleit');
-        const resultCountP = document.getElementById('result-count');
-        const detailPanel = document.getElementById('detail-panel');
-        const closeDetailBtn = document.getElementById('close-detail');
-        const detailHeader = document.getElementById('detail-header');
-        const detailBadge = document.getElementById('detail-badge');
-        const detailCityName = document.getElementById('detail-city-name');
-        const detailContent = document.getElementById('detail-content');
-        const loadingOverlay = document.getElementById('loading');
-
-        function formatNumber(n) { return n ? n.toLocaleString('pt-BR') : '0'; }
-        function getColor(pop) {
-            if (pop > 500000) return '#14532D'; if (pop > 200000) return '#166534'; if (pop > 100000) return '#15803D';
-            if (pop > 50000) return '#16A34A'; if (pop > 20000) return '#22C55E'; if (pop > 10000) return '#4ADE80';
-            if (pop > 5000) return '#86EFAC'; return '#BBF7D0';
+// ============ CORREÇÃO AUTOMÁTICA DE POPULAÇÃO ============
+function corrigirPopulacao(populacao, eleitores) {
+    var pop = Number(populacao) || 0;
+    var ele = Number(eleitores) || 0;
+    
+    if (pop < ele && ele > 100) {
+        // A população está provavelmente truncada; multiplicamos por 10 até superar eleitores
+        var original = pop;
+        while (pop < ele && pop < 10000000) {
+            pop *= 10;
         }
-        function getPartidoColor(sigla) {
-            const map = { 'PT':'#FEE2E2,#991B1B','PL':'#DBEAFE,#1E40AF','PP':'#E0E7FF,#3730A3','MDB':'#FEF3C7,#92400E','PSD':'#FCE7F3,#9D174D','UNIÃO':'#CFFAFE,#155E75','REPUBLICANOS':'#D1FAE5,#065F46','PDT':'#FED7AA,#9A3412','PSDB':'#BFDBFE,#1E3A8A','PODE':'#E9D5FF,#6B21A8','PSOL':'#FECDD3,#9F1239','AVANTE':'#FEF9C3,#854D0E','PRD':'#F3E8FF,#7E22CE','SOLIDARIEDADE':'#FFE4E6,#BE123C','CIDADANIA':'#ECFDF5,#047857','PSB':'#FFF7ED,#C2410C','REDE':'#F0FDF4,#15803D','PCdoB':'#FEF2F2,#B91C1C','NOVO':'#FFF1F2,#E11D48','PC do B':'#FEF2F2,#B91C1C','PATRIOTA':'#FEF3C7,#92400E' };
-            if (map[sigla]) { const [bg, text] = map[sigla].split(','); return { bg, text }; }
-            return { bg: '#F3F4F6', text: '#374151' };
+        if (pop !== original) {
+            console.log('⚠️ População corrigida: ' + original + ' → ' + pop + ' (eleitores: ' + ele + ')');
+            return pop;
         }
+    }
+    return pop;
+}
 
-        function renderCityList(data) {
-            if (!data.length) { cityListDiv.innerHTML = '<div style="padding:24px;text-align:center;">Nenhum município</div>'; return; }
-            let html = '';
-            data.forEach(mun => {
-                const verCount = (vereadoresData[mun.municipio.toUpperCase()] || []).length;
-                const active = (selectedMunicipio && selectedMunicipio.numero === mun.numero) ? 'active' : '';
-                html += `<div class="city-item ${active}" data-numero="${mun.numero}">
-                    <div class="city-number">${mun.numero}</div><div class="city-info"><div class="city-name">${mun.municipio}</div><div class="city-meta">${formatNumber(mun.populacao)} hab. · ${verCount} ver.</div></div><div class="city-chevron">›</div>
-                </div>`;
-            });
-            cityListDiv.innerHTML = html;
-            resultCountP.textContent = `${data.length} de ${municipios.length} municípios`;
-        }
+// ============ ESTADO GLOBAL ============
+var map, geojsonLayer;
+var municipios = [];
+var vereadoresData = {};
+var depEstData = {};
+var depFedData = {};
+var selectedMun = null;
 
-        function filterMunicipios(query) {
-            if (!query) return municipios;
-            const q = query.toLowerCase();
-            return municipios.filter(m => m.municipio.toLowerCase().includes(q) || m.numero.toString().includes(q) || (m.prefeito||'').toLowerCase().includes(q));
-        }
+// ============ UTILITÁRIOS ============
+function formatNumber(val) {
+    var n = Number(val);
+    return isNaN(n) ? '0' : n.toLocaleString('pt-BR');
+}
 
-        function handleSearch() {
-            filteredMunicipios = filterMunicipios(searchInput.value);
-            renderCityList(filteredMunicipios);
-        }
+function getColor(pop) {
+    var p = Number(pop) || 0;
+    if (p > 500000) return '#14532D';
+    if (p > 200000) return '#166534';
+    if (p > 100000) return '#15803D';
+    if (p > 50000) return '#16A34A';
+    if (p > 20000) return '#22C55E';
+    if (p > 10000) return '#4ADE80';
+    return '#BBF7D0';
+}
 
-        function updateTotals() {
-            const totalPop = municipios.reduce((s,m)=> s + (m.populacao||0),0);
-            const totalEleit = municipios.reduce((s,m)=> s + (m.eleitores||0),0);
-            totalPopSpan.textContent = formatNumber(totalPop);
-            totalEleitSpan.textContent = formatNumber(totalEleit);
-        }
+function getPartidoColor(sigla) {
+    var cores = {
+        'PT':'#e74c3c','PL':'#3498db','PP':'#2980b9','MDB':'#f39c12','PSD':'#e91e63',
+        'UNIÃO':'#1abc9c','REPUBLICANOS':'#27ae60','PDT':'#e67e22','PSDB':'#2c3e50',
+        'PODE':'#9b59b6','PSOL':'#c0392b','AVANTE':'#f1c40f','PRD':'#8e44ad',
+        'SOLIDARIEDADE':'#d35400','CIDADANIA':'#16a085','PSB':'#d35400',
+        'REDE':'#2ecc71','PCdoB':'#c0392b','NOVO':'#e74c3c'
+    };
+    return cores[sigla] || '#95a5a6';
+}
 
-        function renderLegend() {
-            const faixas = [{c:'#14532D',l:'> 500 mil'},{c:'#166534',l:'200-500 mil'},{c:'#15803D',l:'100-200 mil'},{c:'#16A34A',l:'50-100 mil'},{c:'#22C55E',l:'20-50 mil'},{c:'#4ADE80',l:'10-20 mil'},{c:'#86EFAC',l:'5-10 mil'},{c:'#BBF7D0',l:'< 5 mil'}];
-            document.getElementById('legend-items').innerHTML = faixas.map(f=>`<div style="display:flex;gap:8px;margin-bottom:6px;"><div style="width:20px;height:12px;background:${f.c};border-radius:20px;"></div><span>${f.l}</span></div>`).join('');
-        }
+// ============ RENDERIZAR LISTA ============
+function renderList(data) {
+    var container = document.getElementById('city-list');
+    if (!data.length) {
+        container.innerHTML = '<div style="padding:20px;text-align:center;color:#999;">Nenhum município</div>';
+        return;
+    }
+    var html = '';
+    for (var i = 0; i < data.length; i++) {
+        var m = data[i];
+        var activeClass = (selectedMun && selectedMun.numero === m.numero) ? ' active' : '';
+        html += '<div class="city-item' + activeClass + '" onclick="selectMunicipio(' + m.numero + ')">' +
+            '<div class="city-num">' + m.numero + '</div>' +
+            '<div><div class="city-name">' + m.municipio + '</div>' +
+            '<div class="city-info-text">' + formatNumber(m.populacao) + ' hab</div></div>' +
+        '</div>';
+    }
+    container.innerHTML = html;
+}
 
-        function initMap(geoData) {
-            map = L.map('map', { center: [-24.5, -51.5], zoom: 7, zoomControl: false, attributionControl: false });
-            L.control.zoom({ position: 'bottomright' }).addTo(map);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
-            geojsonLayer = L.geoJSON(geoData, {
-                style: f => ({ fillColor: getColor(f.properties.populacao||0), weight:1, opacity:0.8, color:'#fff', fillOpacity:0.75 }),
-                onEachFeature: (f, layer) => {
-                    const p = f.properties;
-                    layer.on({
-                        mouseover: e => { e.target.setStyle({ weight:2, color:'#F59E0B', fillOpacity:0.9 }); e.target.bringToFront(); },
-                        mouseout: e => geojsonLayer.resetStyle(e.target),
-                        click: () => { const mun = municipios.find(m=>m.numero===p.numero); if(mun) selectMunicipio(mun); }
-                    });
-                    if (p.lat && p.lng && p.numero) {
-                        L.marker([p.lat, p.lng], { icon: L.divIcon({ html: `<span style="background:white; padding:2px 6px; border-radius:12px; font-weight:bold; font-size:10px;">${p.numero}</span>`, iconSize:[30,20], iconAnchor:[15,10] }), interactive: false }).addTo(map);
-                    }
+// ============ BUSCA ============
+document.getElementById('search-input').addEventListener('input', function() {
+    var q = this.value.toLowerCase();
+    var filtered = municipios.filter(function(m) {
+        return m.municipio.toLowerCase().indexOf(q) >= 0 ||
+               String(m.numero).indexOf(q) >= 0;
+    });
+    renderList(filtered);
+});
+
+// ============ MAPA ============
+function initMap(geoData) {
+    map = L.map('map', {
+        center: [-24.5, -51.5],
+        zoom: 7,
+        zoomControl: true,
+        attributionControl: false
+    });
+    
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19
+    }).addTo(map);
+    
+    geojsonLayer = L.geoJSON(geoData, {
+        style: function(f) {
+            return {
+                fillColor: getColor(f.properties.populacao),
+                weight: 1,
+                color: '#fff',
+                fillOpacity: 0.7
+            };
+        },
+        onEachFeature: function(f, layer) {
+            layer.on({
+                click: function() {
+                    selectMunicipio(f.properties.numero);
                 }
-            }).addTo(map);
-        }
-
-        function selectMunicipio(mun) {
-            selectedMunicipio = mun;
-            renderCityList(filteredMunicipios);
-            map.flyTo([mun.lat, mun.lng], 10, { duration: 0.8 });
-            geojsonLayer.eachLayer(l => {
-                if (l.feature.properties.numero === mun.numero) { l.setStyle({ weight:3, color:'#F59E0B', fillOpacity:0.95 }); l.bringToFront(); }
-                else geojsonLayer.resetStyle(l);
             });
-            openDetailPanel(mun);
+            
+            if (f.properties.lat && f.properties.lng) {
+                L.marker([f.properties.lat, f.properties.lng], {
+                    icon: L.divIcon({
+                        html: '<div style="background:rgba(255,255,255,0.9);padding:2px 6px;border-radius:10px;font-size:10px;font-weight:bold;">' + f.properties.numero + '</div>',
+                        iconSize: [30, 20],
+                        iconAnchor: [15, 10]
+                    }),
+                    interactive: false
+                }).addTo(map);
+            }
         }
+    }).addTo(map);
+}
 
-        function closeDetail() {
-            selectedMunicipio = null; detailPanel.classList.remove('visible');
-            geojsonLayer.resetStyle(); map.flyTo([-24.5, -51.5], 7);
-            renderCityList(filteredMunicipios);
+// ============ SELEÇÃO DE MUNICÍPIO ============
+function selectMunicipio(numero) {
+    selectedMun = municipios.find(function(m) { return m.numero === numero; });
+    if (!selectedMun) return;
+    
+    // Atualizar lista visual
+    document.querySelectorAll('.city-item').forEach(function(item) {
+        item.classList.remove('active');
+        if (parseInt(item.querySelector('.city-num').textContent) === numero) {
+            item.classList.add('active');
         }
+    });
+    
+    // Voar no mapa
+    if (selectedMun.lat && selectedMun.lng) {
+        map.flyTo([selectedMun.lat, selectedMun.lng], 11, { duration: 1 });
+    }
+    
+    // Destacar no mapa
+    if (geojsonLayer) {
+        geojsonLayer.eachLayer(function(l) {
+            if (l.feature && l.feature.properties.numero === numero) {
+                l.setStyle({ weight: 3, color: '#F59E0B', fillOpacity: 0.9 });
+                l.bringToFront();
+            } else {
+                geojsonLayer.resetStyle(l);
+            }
+        });
+    }
+    
+    // Abrir detalhes
+    openDetail(selectedMun);
+}
 
-        function openDetailPanel(mun) {
-            detailHeader.style.background = `linear-gradient(135deg, ${getColor(mun.populacao)}, #14532D)`;
-            detailBadge.textContent = `Nº ${mun.numero}`; detailCityName.textContent = mun.municipio;
-            const vereadores = vereadoresData[mun.municipio.toUpperCase()] || [];
-            const depEst = depEstaduaisData[String(mun.numero)] || [];
-            const depFed = depFederaisData[String(mun.numero)] || [];
-            let html = `
-                <div class="card"><div class="card-header"><div class="card-icon" style="background:#16A34A;">👥</div><div><div class="card-title">População Estimada</div><div class="card-subtitle">IBGE 2025</div></div></div><div class="big-number" style="color:#14532D;">${formatNumber(mun.populacao)}</div><div>habitantes</div></div>
-                <div class="card"><div class="card-header"><div class="card-icon" style="background:#D97706;">🗳️</div><div><div class="card-title">Eleitores</div><div class="card-subtitle">TSE 2024</div></div></div><div class="big-number" style="color:#92400E;">${formatNumber(mun.eleitores)}</div></div>
-                <div class="card"><div class="card-header"><div class="card-icon" style="background:#7C3AED;">🏛️</div><div><div class="card-title">Prefeito(a) Eleito(a)</div><div class="card-subtitle">Mandato 2025-2028</div></div></div><div style="font-family:'Playfair Display'; font-size:22px; font-weight:700; color:#4C1D95;">${mun.prefeito||'Não informado'}</div></div>
-                <div class="accordion"><div class="accordion-header"><span>👤 Vereadores Eleitos (${vereadores.length})</span><span>▼</span></div><div class="accordion-content"><div style="max-height:400px; overflow-y:auto;">${vereadores.map((v,i)=>`<div class="deputy-item"><div class="deputy-rank">${i+1}</div><div class="deputy-info"><div class="deputy-name">${v.nome}</div><div><span class="deputy-party" style="background:${getPartidoColor(v.partido).bg};color:${getPartidoColor(v.partido).text};">${v.partido}</span> <span style="font-size:11px;">Nº ${v.numero} · ${v.situacao.includes('QP')?'QP':'Média'}</span></div></div></div>`).join('') || '<div style="padding:12px;text-align:center;">Nenhum dado disponível</div>'}</div></div></div>
-                <div class="accordion"><div class="accordion-header"><span>📋 Deputados Estaduais (${depEst.length})</span><span>▼</span></div><div class="accordion-content"><div style="max-height:400px; overflow-y:auto;">${depEst.map((d,i)=>`<div class="deputy-item"><div class="deputy-rank">${i+1}</div><div class="deputy-info"><div class="deputy-name">${d.n} ${d.e?'<span style="background:#FEF3C7;color:#92400E;font-size:9px;padding:2px 6px;border-radius:20px;">⭐ Eleito</span>':''}</div><div><span class="deputy-party" style="background:${getPartidoColor(d.p).bg};color:${getPartidoColor(d.p).text};">${d.p}</span> <span style="font-size:11px;">Nº ${d.nr}</span></div></div><div class="deputy-votes">${formatNumber(d.v)} <span style="font-size:9px;color:#94a3b8;">votos</span></div></div>`).join('') || '<div style="padding:12px;text-align:center;">Nenhum dado disponível</div>'}</div></div></div>
-                <div class="accordion"><div class="accordion-header"><span>🏛️ Deputados Federais (${depFed.length})</span><span>▼</span></div><div class="accordion-content"><div style="max-height:400px; overflow-y:auto;">${depFed.map((d,i)=>`<div class="deputy-item"><div class="deputy-rank">${i+1}</div><div class="deputy-info"><div class="deputy-name">${d.n} ${d.e?'<span style="background:#DBEAFE;color:#1E40AF;font-size:9px;padding:2px 6px;border-radius:20px;">⭐ Eleito</span>':''}</div><div><span class="deputy-party" style="background:${getPartidoColor(d.p).bg};color:${getPartidoColor(d.p).text};">${d.p}</span> <span style="font-size:11px;">Nº ${d.nr}</span></div></div><div class="deputy-votes">${formatNumber(d.v)} <span style="font-size:9px;color:#94a3b8;">votos</span></div></div>`).join('') || '<div style="padding:12px;text-align:center;">Nenhum dado disponível</div>'}</div></div></div>
-            `;
-            detailContent.innerHTML = html;
-            detailPanel.classList.add('visible');
-            // Accordion toggles
-            detailContent.querySelectorAll('.accordion-header').forEach((h) => {
-                h.addEventListener('click', () => {
-                    const content = h.nextElementSibling;
-                    content.classList.toggle('open');
-                    const chevron = h.querySelector('span:last-child');
-                    if (chevron) chevron.textContent = content.classList.contains('open') ? '▲' : '▼';
-                });
-            });
-        }
+// ============ DETALHES DO MUNICÍPIO ============
+function openDetail(mun) {
+    document.getElementById('detail-title').textContent = mun.municipio + ' (Nº ' + mun.numero + ')';
+    
+    var ver = vereadoresData[mun.municipio.toUpperCase()] || [];
+    var est = depEstData[String(mun.numero)] || [];
+    var fed = depFedData[String(mun.numero)] || [];
+    
+    var popCorrigida = mun.populacao;
+    var popOriginal = mun.populacaoOriginal;
+    
+    var html = '';
+    html += '<div class="info-row"><span class="info-label">👥 População (IBGE 2025)</span><span class="info-value">' + formatNumber(popCorrigida);
+    if (popOriginal && popOriginal !== popCorrigida) {
+        html += ' <span class="corrected-badge">corrigida</span>';
+    }
+    html += '</span></div>';
+    
+    html += '<div class="info-row"><span class="info-label">🗳️ Eleitores (TSE 2024)</span><span class="info-value">' + formatNumber(mun.eleitores) + '</span></div>';
+    html += '<div class="info-row"><span class="info-label">🏛️ Prefeito(a) 2025-2028</span><span class="info-value" style="font-size:16px;">' + (mun.prefeito || 'Não informado') + '</span></div>';
+    
+    // Vereadores
+    html += '<div class="section-title">👤 Vereadores (' + ver.length + ')</div>';
+    if (ver.length > 0) {
+        html += '<table><tr><th>Nome</th><th>Partido</th><th>Nº</th></tr>';
+        ver.forEach(function(v) {
+            html += '<tr><td>' + v.nome + '</td><td><span class="party-tag" style="background:' + getPartidoColor(v.partido) + ';">' + v.partido + '</span></td><td>' + v.numero + '</td></tr>';
+        });
+        html += '</table>';
+    } else {
+        html += '<p style="color:#999;">Dados não disponíveis</p>';
+    }
+    
+    // Deputados estaduais
+    html += '<div class="section-title">📊 Deputados Estaduais (' + est.length + ')</div>';
+    if (est.length > 0) {
+        html += '<table><tr><th>Nome</th><th>Partido</th><th>Votos</th><th>Status</th></tr>';
+        est.forEach(function(d) {
+            html += '<tr><td>' + d.n + '</td><td><span class="party-tag" style="background:' + getPartidoColor(d.p) + ';">' + d.p + '</span></td><td>' + formatNumber(d.v) + '</td><td>' + (d.e ? '⭐ Eleito' : '') + '</td></tr>';
+        });
+        html += '</table>';
+    } else {
+        html += '<p style="color:#999;">Dados não disponíveis</p>';
+    }
+    
+    // Deputados federais
+    html += '<div class="section-title">🏛️ Deputados Federais (' + fed.length + ')</div>';
+    if (fed.length > 0) {
+        html += '<table><tr><th>Nome</th><th>Partido</th><th>Votos</th><th>Status</th></tr>';
+        fed.forEach(function(d) {
+            html += '<tr><td>' + d.n + '</td><td><span class="party-tag" style="background:' + getPartidoColor(d.p) + ';">' + d.p + '</span></td><td>' + formatNumber(d.v) + '</td><td>' + (d.e ? '⭐ Eleito' : '') + '</td></tr>';
+        });
+        html += '</table>';
+    } else {
+        html += '<p style="color:#999;">Dados não disponíveis</p>';
+    }
+    
+    document.getElementById('detail-content').innerHTML = html;
+    document.getElementById('detail-overlay').classList.add('show');
+}
 
-        async function loadData() {
-            try {
-                const [geoRes, verRes, estRes, fedRes] = await Promise.all([fetch(DATA_URLS.geojson), fetch(DATA_URLS.vereadores), fetch(DATA_URLS.depEstaduais), fetch(DATA_URLS.depFederais)]);
-                const geoData = await geoRes.json();
-                vereadoresData = await verRes.json();
-                depEstaduaisData = await estRes.json();
-                depFederaisData = await fedRes.json();
-                municipios = geoData.features.filter(f=>f.properties.numero).map(f=>({ numero:f.properties.numero, municipio:f.properties.municipio, populacao:f.properties.populacao||0, eleitores:f.properties.eleitores||0, prefeito:f.properties.prefeito||'', lat:f.properties.lat, lng:f.properties.lng })).sort((a,b)=>a.numero-b.numero);
-                filteredMunicipios = municipios;
-                updateTotals(); renderCityList(municipios); initMap(geoData); renderLegend();
-                loadingOverlay.style.opacity='0'; setTimeout(()=>loadingOverlay.style.display='none',300);
-            } catch(e) { alert('Erro ao carregar dados. Verifique as URLs.'); loadingOverlay.style.display='none'; }
-        }
+function closeDetail() {
+    document.getElementById('detail-overlay').classList.remove('show');
+    selectedMun = null;
+    if (geojsonLayer) geojsonLayer.resetStyle();
+    document.querySelectorAll('.city-item').forEach(function(item) { item.classList.remove('active'); });
+}
 
-        toggleBtn.addEventListener('click', ()=>{ sidebar.classList.toggle('hidden'); toggleBtn.textContent = sidebar.classList.contains('hidden') ? '▶' : '◀'; });
-        searchInput.addEventListener('input', handleSearch);
-        clearSearchBtn.addEventListener('click', ()=>{ searchInput.value=''; handleSearch(); });
-        closeDetailBtn.addEventListener('click', closeDetail);
-        cityListDiv.addEventListener('click', e => { const item = e.target.closest('.city-item'); if(item){ const mun = municipios.find(m=>m.numero===parseInt(item.dataset.numero)); if(mun) selectMunicipio(mun); }});
-        loadData();
-    })();
+// ============ TOGGLE PAINEL ============
+function togglePanel() {
+    var panel = document.getElementById('panel');
+    var btn = document.getElementById('toggle-btn');
+    if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        btn.textContent = '◀';
+        btn.style.left = '380px';
+    } else {
+        panel.classList.add('hidden');
+        btn.textContent = '▶';
+        btn.style.left = '10px';
+    }
+}
+
+// ============ CARREGAR DADOS COM CORREÇÃO ============
+async function loadData() {
+    try {
+        var responses = await Promise.all([
+            fetch(GEOJSON_URL),
+            fetch(VEREADORES_URL),
+            fetch(DEP_EST_URL),
+            fetch(DEP_FED_URL)
+        ]);
+        
+        var geoData = await responses[0].json();
+        vereadoresData = await responses[1].json();
+        depEstData = await responses[2].json();
+        depFedData = await responses[3].json();
+        
+        municipios = geoData.features
+            .filter(function(f) { return f.properties && f.properties.numero; })
+            .map(function(f) {
+                var popOriginal = Number(f.properties.populacao) || 0;
+                var eleitores = Number(f.properties.eleitores) || 0;
+                var popCorrigida = corrigirPopulacao(popOriginal, eleitores);
+                
+                // Atualiza também no GeoJSON para o mapa refletir as cores corretas
+                f.properties.populacao = popCorrigida;
+                
+                return {
+                    numero: f.properties.numero,
+                    municipio: f.properties.municipio || 'N/A',
+                    populacao: popCorrigida,
+                    populacaoOriginal: (popOriginal !== popCorrigida) ? popOriginal : null,
+                    eleitores: eleitores,
+                    prefeito: f.properties.prefeito || '',
+                    lat: f.properties.lat,
+                    lng: f.properties.lng
+                };
+            })
+            .sort(function(a, b) { return a.numero - b.numero; });
+        
+        console.log('✅ Municípios carregados e corrigidos:', municipios.length);
+        
+        renderList(municipios);
+        initMap(geoData);
+    } catch (err) {
+        console.error('❌ Erro ao carregar dados:', err);
+        alert('Erro ao carregar dados. Verifique a conexão.');
+    }
+}
+
+loadData();
 </script>
 </body>
 </html>
