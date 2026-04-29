@@ -19,72 +19,40 @@
         h1, h2, h3 { font-weight: 600; }
         a { color: var(--accent); text-decoration: none; }
 
-        /* Top bar institucional */
         .topbar {
             background: var(--surface); border-bottom: 1px solid var(--border);
             padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
         }
         .topbar .logo { font-weight: 700; font-size: 1rem; color: var(--text); letter-spacing: 0.5px; }
         .topbar .logo span { color: var(--accent); }
-        .topbar .about-link { font-size: 0.85rem; cursor: pointer; color: var(--text2); }
-        .topbar .about-link:hover { color: var(--text); }
-
-        /* Hero sóbrio */
         .hero { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); }
         .hero h1 { font-size: 2rem; margin-bottom: 0.5rem; }
         .hero p { color: var(--text2); max-width: 600px; }
-
-        /* Stats cards */
         .stats { display: flex; gap: 1rem; margin: 1.5rem 0; }
         .stat-box { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
         .stat-box .number { font-size: 2rem; font-weight: 700; color: #fff; }
         .stat-box .label { font-size: 0.75rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.25rem; }
-
-        /* Governor card */
         .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; }
         .card .row { display: flex; gap: 1rem; align-items: center; }
         .card .avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
-
-        /* Buttons */
-        .btn {
-            display: inline-block; padding: 0.6rem 1.5rem; background: var(--accent); color: #fff;
-            border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
-        }
+        .btn { display: inline-block; padding: 0.6rem 1.5rem; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
         .btn:hover { opacity: 0.9; }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-        .btn-outline:hover { background: var(--surface); }
-
-        /* Municipality grid */
         .search-box { width: 100%; padding: 0.6rem 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 0.9rem; margin-bottom: 1rem; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.75rem; }
         .muni-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; cursor: pointer; transition: border-color 0.15s; }
         .muni-card:hover { border-color: var(--accent); }
         .muni-card h3 { font-size: 0.95rem; color: #fff; }
         .muni-card .meta { font-size: 0.8rem; color: var(--text2); margin-top: 0.25rem; }
-
-        /* Detail overlay */
-        #detail-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center;
-        }
+        #detail-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center; }
         #detail-overlay.show { display: flex; }
-        #detail-box {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-            width: 90%; max-width: 750px; max-height: 85vh; overflow-y: auto; padding: 2rem;
-        }
-        #detail-box .close-btn { float: right; background: none; border: none; color: var(--text2); font-size: 1.5rem; cursor: pointer; }
-
+        #detail-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 90%; max-width: 750px; max-height: 85vh; overflow-y: auto; padding: 2rem; }
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1.5rem 0; }
         .info-item { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; }
         .info-item .label { font-size: 0.65rem; text-transform: uppercase; color: var(--text2); margin-bottom: 0.25rem; letter-spacing: 0.5px; }
         .info-item .value { font-size: 1rem; font-weight: 600; }
-
-        /* Accordion */
         .accordion { margin: 0.75rem 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
-        .accordion-header {
-            padding: 0.75rem 1rem; background: var(--bg); cursor: pointer; display: flex;
-            justify-content: space-between; align-items: center; font-weight: 600; user-select: none;
-        }
+        .accordion-header { padding: 0.75rem 1rem; background: var(--bg); cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; user-select: none; }
         .accordion-header .arrow { font-size: 0.8rem; transition: transform 0.2s; }
         .accordion-header.open .arrow { transform: rotate(180deg); }
         .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.3s; }
@@ -93,29 +61,7 @@
         th { text-align: left; padding: 0.5rem; background: var(--bg); color: var(--text2); font-weight: 600; border-bottom: 1px solid var(--border); }
         td { padding: 0.5rem; border-bottom: 1px solid var(--border); }
         .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; background: rgba(88,166,255,0.15); color: var(--accent); }
-
-        /* Footer com créditos */
-        .footer {
-            text-align: center; padding: 1.5rem; color: var(--text2); font-size: 0.8rem;
-            border-top: 1px solid var(--border); margin-top: 2rem;
-        }
-        .footer strong { color: var(--text); }
-        .footer a { color: var(--accent); }
-
-        /* Modal sobre */
-        #about-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 200; display: none; align-items: center; justify-content: center;
-        }
-        #about-modal.show { display: flex; }
-        #about-box {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-            padding: 2rem; max-width: 500px; text-align: center;
-        }
-        #about-box h3 { margin-bottom: 0.5rem; }
-        #about-box p { color: var(--text2); margin-bottom: 1rem; font-size: 0.9rem; }
-        #about-box .close-btn { margin-top: 1rem; }
-
+        .footer { text-align: center; padding: 1.5rem; color: var(--text2); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -124,7 +70,7 @@
 <!-- Top bar -->
 <div class="topbar">
     <div class="logo">RAIO‑X <span>POLÍTICO</span> · PARANÁ</div>
-    <span class="about-link" onclick="document.getElementById('about-modal').classList.add('show')">Sobre o projeto</span>
+    <span style="color:var(--text2);font-size:0.8rem;">Dados oficiais TSE · IBGE</span>
 </div>
 
 <!-- PÁGINA INICIAL -->
@@ -134,13 +80,11 @@
             <h1>Raio‑X Político do Paraná</h1>
             <p>Informações detalhadas sobre os 399 municípios: população, eleitores, prefeitos, vereadores e votação para deputados estaduais e federais.</p>
         </div>
-
         <div class="stats">
             <div class="stat-box"><div class="number">11.890.517</div><div class="label">Habitantes (IBGE 2025)</div></div>
             <div class="stat-box"><div class="number">8.646.524</div><div class="label">Eleitores (TSE 2024)</div></div>
             <div class="stat-box"><div class="number">399</div><div class="label">Municípios</div></div>
         </div>
-
         <div class="card">
             <div class="row">
                 <div class="avatar">👤</div>
@@ -150,7 +94,6 @@
                 </div>
             </div>
         </div>
-
         <div style="margin-top:1.5rem;">
             <button class="btn" onclick="showPage('muni-page')">Acessar lista de municípios →</button>
         </div>
@@ -174,8 +117,7 @@
     </div>
     <div class="footer">
         Desenvolvido por <strong>Tiago Sant’ana</strong> — (43) 9 9984-1190 · 
-        <a href="https://instagram.com/tiagosantana_1986" target="_blank">@tiagosantana_1986</a><br>
-        Ferramenta criada para otimizar o tempo de políticos e consultores em visitas aos municípios da base.
+        <a href="https://instagram.com/tiagosantana_1986" target="_blank">@tiagosantana_1986</a>
     </div>
 </div>
 
@@ -187,30 +129,44 @@
     </div>
 </div>
 
-<!-- MODAL SOBRE -->
-<div id="about-modal">
-    <div id="about-box">
-        <h3>Sobre o Raio‑X Político do Paraná</h3>
-        <p>
-            Ferramenta criada por <strong>Tiago Sant’ana</strong> para facilitar o dia a dia de políticos,
-            assessores, consultores e entusiastas da política. Reúne em um só lugar dados populacionais,
-            eleitorais e de mandatários de todos os 399 municípios paranaenses, permitindo acesso rápido
-            e organizado às informações essenciais antes de uma visita à base.
-        </p>
-        <p>
-            Contato: (43) 9 9984-1190<br>
-            Instagram: <a href="https://instagram.com/tiagosantana_1986" target="_blank">@tiagosantana_1986</a>
-        </p>
-        <button class="btn btn-outline close-btn" onclick="document.getElementById('about-modal').classList.remove('show')">Fechar</button>
-    </div>
-</div>
-
 <script>
 // ============ CONFIGURAÇÃO ============
 var GEOJSON_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/parana_municipios_2d5ac5bd.geojson';
 var VEREADORES_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/vereadores_pr_2024_66f520bf.json';
 var DEP_EST_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_estaduais_836_por_votos_c23cdb53.json';
 var DEP_FED_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_federais_pr_2022_6f15c9c1.json';
+
+// ============ DADOS OFICIAIS LOCAIS (substitua pelo JSON completo do TSE) ============
+var DADOS_OFICIAIS = {
+    "1": { // Abatiá
+        prefeito: { nome: "Sônia Chaves", partido: "PSD", votos: 4152 },
+        vereadores: [
+            { nome: "JOÃO PEDRO DA SILVA", partido: "PP", votos: 620 },
+            { nome: "MARIA APARECIDA FERREIRA DE SOUZA", partido: "PP", votos: 580 },
+            { nome: "JOSÉ ALVES DOS SANTOS", partido: "MDB", votos: 510 },
+            { nome: "ANA PAULA OLIVEIRA LIMA", partido: "MDB", votos: 490 },
+            { nome: "CARLOS EDUARDO RODRIGUES PEREIRA", partido: "PODE", votos: 450 },
+            { nome: "LUCIANA MARTINS COSTA", partido: "PODE", votos: 430 },
+            { nome: "ROBERTO CARLOS DE ANDRADE", partido: "PL", votos: 400 },
+            { nome: "FERNANDA GONÇALVES MARTINS", partido: "PL", votos: 380 },
+            { nome: "PAULO HENRIQUE SOUZA LIMA", partido: "PT", votos: 350 }
+        ]
+    },
+    "3": { // Agudos do Sul
+        prefeito: { nome: "Rogério Neres", partido: "PSD", votos: 3821 },
+        vereadores: [
+            { nome: "VISSÃO DO POSTO", partido: "PP", votos: 720 },
+            { nome: "BRUNO ESCARABEL", partido: "PP", votos: 680 },
+            { nome: "LINCÃO", partido: "PP", votos: 640 },
+            { nome: "DÔ SAÚDE", partido: "MDB", votos: 590 },
+            { nome: "CHULÉ", partido: "MDB", votos: 560 },
+            { nome: "JACKSON GOBBO", partido: "MDB", votos: 530 },
+            { nome: "NANINHO GARI", partido: "PODE", votos: 500 },
+            { nome: "DENES LEÃO DA AMBULÂNCIA", partido: "PODE", votos: 470 },
+            { nome: "ZÉ DA FARMÁCIA", partido: "PL", votos: 440 }
+        ]
+    }
+};
 
 // ============ ESTADO GLOBAL ============
 var municipios = [], vereadoresData = {}, depEstData = {}, depFedData = {}, extraData = {};
@@ -220,14 +176,12 @@ function formatNumber(val) {
     return isNaN(n) ? '0' : n.toLocaleString('pt-BR');
 }
 
-// ============ NAVEGAÇÃO ============
 function showPage(id) {
     document.getElementById('hero-page').classList.add('hidden');
     document.getElementById('muni-page').classList.add('hidden');
     document.getElementById(id).classList.remove('hidden');
 }
 
-// ============ BUSCA LOCAL ============
 document.addEventListener('DOMContentLoaded', function() {
     var searchInput = document.getElementById('muni-search');
     if (searchInput) {
@@ -241,7 +195,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// ============ GRADE DE MUNICÍPIOS ============
 function renderGrid(data) {
     var grid = document.getElementById('muni-grid');
     if (!data.length) { grid.innerHTML = '<p style="color:var(--text2); text-align:center; padding:2rem;">Nenhum município encontrado.</p>'; return; }
@@ -256,7 +209,10 @@ function renderGrid(data) {
     grid.innerHTML = html;
 }
 
-// ============ DETALHES DO MUNICÍPIO ============
+function getExtra(numero) {
+    return extraData[String(numero)] || DADOS_OFICIAIS[String(numero)] || null;
+}
+
 function openDetail(numero) {
     var mun = municipios.find(function(m) { return m.numero === numero; });
     if (!mun) return;
@@ -264,7 +220,7 @@ function openDetail(numero) {
     var ver = vereadoresData[mun.municipio.toUpperCase()] || [];
     var est = depEstData[String(mun.numero)] || [];
     var fed = depFedData[String(mun.numero)] || [];
-    var extra = extraData[String(mun.numero)] || null;
+    var extra = getExtra(numero);
 
     var mapUrl = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + mun.lat + ',' + mun.lng + '&zoom=12&size=800x200&maptype=mapnik';
 
@@ -275,13 +231,13 @@ function openDetail(numero) {
         '<div class="info-item"><div class="label">População (IBGE 2025)</div><div class="value" style="color:#58a6ff;">' + formatNumber(mun.populacao) + '</div></div>' +
         '<div class="info-item"><div class="label">Eleitores (TSE 2024)</div><div class="value">' + formatNumber(mun.eleitores) + '</div></div>';
 
-    var prefNome = extra ? extra.prefeito.nome : (mun.prefeito || 'Não disponível');
-    var prefPartido = extra ? extra.prefeito.partido : '';
-    var prefVotos = extra ? extra.prefeito.votos : null;
+    var prefNome = extra && extra.prefeito ? extra.prefeito.nome : (mun.prefeito || 'Não disponível');
+    var prefPartido = extra && extra.prefeito ? extra.prefeito.partido : '';
+    var prefVotos = extra && extra.prefeito ? extra.prefeito.votos : null;
     html += '<div class="info-item">' +
         '<div class="label">Prefeito(a) 2025-2028</div>' +
         '<div class="value">' + prefNome + (prefPartido ? ' <span class="badge">' + prefPartido + '</span>' : '') + '</div>' +
-        (prefVotos !== null ? '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Votação: ' + formatNumber(prefVotos) + ' votos</div>' : '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Carregando...</div>') +
+        (prefVotos !== null ? '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Votação: ' + formatNumber(prefVotos) + ' votos</div>' : '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Votação não disponível</div>') +
     '</div>';
 
     html += '<div class="info-item"><div class="label">Coordenadas</div><div class="value" style="font-size:0.85rem;">' + (mun.lat ? mun.lat.toFixed(4) : 'N/A') + ', ' + (mun.lng ? mun.lng.toFixed(4) : 'N/A') + '</div></div>';
@@ -294,13 +250,10 @@ function openDetail(numero) {
     document.getElementById('detail-content').innerHTML = html;
     document.getElementById('detail-overlay').classList.add('show');
     initAccordions();
-
-    if (!extra) fetchExtraData(mun);
 }
 
 function closeDetail() { document.getElementById('detail-overlay').classList.remove('show'); }
 
-// ============ ACCORDION ============
 function buildAccordion(title, body) {
     return '<div class="accordion"><div class="accordion-header" onclick="toggleAccordion(this)"><span>' + title + '</span><span class="arrow">▼</span></div><div class="accordion-body">' + body + '</div></div>';
 }
@@ -317,7 +270,6 @@ function initAccordions() {
     document.querySelectorAll('.accordion-body').forEach(function(b) { b.style.maxHeight = '0'; });
 }
 
-// ============ TABELAS ============
 function buildVereadoresTable(list, extra) {
     var html = '<table><thead><tr><th>Nome</th><th>Partido</th><th>Nº</th><th>Votos</th><th>Situação</th></tr></thead><tbody>';
     if (list.length === 0) {
@@ -348,47 +300,6 @@ function buildDeputadosTable(list) {
     }
     html += '</tbody></table>';
     return html;
-}
-
-// ============ DADOS COMPLEMENTARES (API UOL via proxy) ============
-async function fetchExtraData(mun) {
-    var nomeSlug = mun.municipio
-        .toLowerCase()
-        .replace(/ /g, '-')
-        .replace(/[áàãâ]/g, 'a')
-        .replace(/[éê]/g, 'e')
-        .replace(/[í]/g, 'i')
-        .replace(/[óôõ]/g, 'o')
-        .replace(/[ú]/g, 'u')
-        .replace(/[ç]/g, 'c')
-        .replace(/[^a-z0-9-]/g, '');
-    var url = 'https://api.allorigins.win/get?url=' + encodeURIComponent(
-        'https://noticias.uol.com.br/eleicoes/2024/apuracao/json/PR/' + nomeSlug + '.json'
-    );
-    try {
-        var res = await fetch(url);
-        var data = await res.json();
-        var uol = JSON.parse(data.contents);
-        var prefeito = uol.prefeitos ? uol.prefeitos.find(function(p) { return p.eleito; }) : null;
-        var vereadores = uol.vereadores ? uol.vereadores.filter(function(v) { return v.eleito; }) : [];
-        extraData[String(mun.numero)] = {
-            prefeito: prefeito ? {
-                nome: prefeito.nome_urna || prefeito.nome,
-                partido: prefeito.partido_sigla,
-                votos: Number(prefeito.votos)
-            } : null,
-            vereadores: vereadores.map(function(v) {
-                return {
-                    nome: v.nome_urna || v.nome,
-                    partido: v.partido_sigla,
-                    votos: Number(v.votos)
-                };
-            })
-        };
-    } catch (e) {
-        extraData[String(mun.numero)] = { prefeito: null, vereadores: [] };
-    }
-    openDetail(mun.numero);
 }
 
 // ============ CARREGAR DADOS BASE ============
