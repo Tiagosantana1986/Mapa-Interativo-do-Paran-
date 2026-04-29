@@ -13,18 +13,19 @@
             --text: #c9d1d9;
             --text2: #8b949e;
             --accent: #58a6ff;
+            --green: #2ecc71;
+            --yellow: #f1c40f;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
         .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
         h1, h2, h3 { font-weight: 600; }
         a { color: var(--accent); text-decoration: none; }
-
         .topbar {
             background: var(--surface); border-bottom: 1px solid var(--border);
             padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
         }
-        .topbar .logo { font-weight: 700; font-size: 1rem; color: var(--text); letter-spacing: 0.5px; }
+        .topbar .logo { font-weight: 700; font-size: 1rem; color: var(--text); }
         .topbar .logo span { color: var(--accent); }
         .hero { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); }
         .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
@@ -39,6 +40,7 @@
         .btn { display: inline-block; padding: 0.6rem 1.5rem; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
         .btn:hover { opacity: 0.9; }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-green { background: var(--green); }
         .search-box { width: 100%; padding: 0.6rem 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 0.9rem; margin-bottom: 1rem; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.75rem; }
         .muni-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; cursor: pointer; transition: border-color 0.15s; }
@@ -66,10 +68,12 @@
         .hidden { display: none !important; }
         .history-text { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; color: var(--text2); font-size: 0.95rem; line-height: 1.8; margin: 1.5rem 0; }
         .history-text h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #fff; margin-bottom: 1rem; }
-        
-        .editable { cursor: pointer; color: var(--accent); text-decoration: underline dotted; }
-        .editable:hover { color: #fff; }
-        .votos-input { width: 80px; padding: 2px 6px; border: 1px solid var(--accent); border-radius: 4px; background: var(--bg); color: var(--text); font-size: inherit; }
+        .progress-container { margin: 1rem 0; display: none; }
+        .progress-container.active { display: block; }
+        .progress-bar { width: 100%; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+        .progress-text { font-size: 0.8rem; color: var(--text2); margin-top: 0.25rem; }
+        .badge-success { background: rgba(46,204,113,0.2); color: var(--green); }
     </style>
 </head>
 <body>
@@ -127,6 +131,14 @@
             <h2>📍 399 Municípios do Paraná</h2>
             <button class="btn btn-outline" onclick="showPage('hero-page')">← Voltar</button>
         </div>
+        <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-green" onclick="carregarDadosTSE()">🔄 Importar dados do TSE automaticamente</button>
+            <span style="font-size:0.75rem; color:var(--text2);">(busca votação de prefeitos e vereadores)</span>
+        </div>
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <div class="progress-text" id="progress-text">Iniciando...</div>
+        </div>
         <input type="text" class="search-box" id="muni-search" placeholder="Buscar por nome ou número...">
         <div class="grid" id="muni-grid"></div>
     </div>
@@ -153,13 +165,13 @@ var DEP_FED_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7Txf
 
 // ============ ESTADO GLOBAL ============
 var municipios = [], vereadoresData = {}, depEstData = {}, depFedData = {};
-var votosSalvos = {}; // { "4": { prefeito: 12345, vereadores: { "NOME|PARTIDO": 123 } } }
+var tseCompleto = {}; // dados completos do TSE
 
-// Recupera dados salvos
-try { votosSalvos = JSON.parse(localStorage.getItem('raiox_votos') || '{}'); } catch(e) {}
+// Recupera cache
+try { tseCompleto = JSON.parse(localStorage.getItem('raiox_tse_completo') || '{}'); } catch(e) {}
 
-function salvarDados() {
-    localStorage.setItem('raiox_votos', JSON.stringify(votosSalvos));
+function salvarTSE() {
+    localStorage.setItem('raiox_tse_completo', JSON.stringify(tseCompleto));
 }
 
 function formatNumber(val) {
@@ -171,6 +183,98 @@ function showPage(id) {
     document.getElementById('hero-page').classList.add('hidden');
     document.getElementById('muni-page').classList.add('hidden');
     document.getElementById(id).classList.remove('hidden');
+}
+
+// ============ IMPORTAÇÃO AUTOMÁTICA DO TSE ============
+async function carregarDadosTSE() {
+    if (!confirm('O sistema irá buscar automaticamente os dados de todos os 399 municípios do TSE. Isso pode levar alguns minutos. Deseja continuar?')) return;
+    
+    var container = document.getElementById('progress-container');
+    var fill = document.getElementById('progress-fill');
+    var text = document.getElementById('progress-text');
+    container.classList.add('active');
+    
+    try {
+        // 1. Obter lista de municípios do TSE (códigos oficiais)
+        text.textContent = 'Obtendo lista de municípios do TSE...';
+        var resp = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://resultados.tse.jus.br/oficial/eleicao/e619/2024/json/UF/PR/municipios.json'));
+        var lista = await resp.json();
+        var municipiosTSE = lista.municipios || [];
+        
+        // Cria mapeamento: nome normalizado -> código TSE
+        var mapaCodigos = {};
+        municipiosTSE.forEach(function(mun) {
+            var nome = mun.nm.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            mapaCodigos[nome] = mun.codigo;
+        });
+        
+        text.textContent = 'Encontrados ' + municipiosTSE.length + ' municípios. Iniciando busca...';
+        
+        var total = municipios.length;
+        var carregados = 0;
+        
+        for (var i = 0; i < total; i++) {
+            var mun = municipios[i];
+            var nomeGeo = mun.municipio.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            var codigo = mapaCodigos[nomeGeo];
+            
+            if (!codigo) {
+                console.warn('❌ Código TSE não encontrado para: ' + mun.municipio);
+                carregados++;
+                continue;
+            }
+            
+            try {
+                var url = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://resultados.tse.jus.br/oficial/eleicao/e619/2024/json/UF/PR/municipios/' + codigo + '/turno1.json');
+                var res = await fetch(url);
+                var data = await res.json();
+                
+                // Extrai prefeito eleito
+                var prefeito = (data.cand || []).find(function(c) { return c.cargo === 'Prefeito' && c.e === 'e'; });
+                
+                // Extrai vereadores eleitos
+                var vereadores = (data.cand || []).filter(function(c) { return c.cargo === 'Vereador' && c.e === 'e'; });
+                
+                tseCompleto[String(mun.numero)] = {
+                    prefeito: prefeito ? {
+                        nome: prefeito.nm,
+                        partido: prefeito.partido,
+                        vice: prefeito.vice || '',
+                        coligacao: prefeito.coligacao || '',
+                        votos: Number(prefeito.vap),
+                        percentual: prefeito.pvap ? Number(prefeito.pvap).toFixed(2) + '%' : ''
+                    } : null,
+                    vereadores: vereadores.map(function(v) {
+                        return {
+                            nome: v.nm,
+                            partido: v.partido,
+                            votos: Number(v.vap)
+                        };
+                    })
+                };
+            } catch(e) {
+                console.warn('⚠️ Erro ao buscar ' + mun.municipio + ': ' + e.message);
+            }
+            
+            carregados++;
+            var pct = Math.round((carregados / total) * 100);
+            fill.style.width = pct + '%';
+            text.textContent = carregados + ' de ' + total + ' municípios (' + pct + '%)';
+            
+            // Pequeno delay para não sobrecarregar
+            await new Promise(function(r) { setTimeout(r, 100); });
+        }
+        
+        salvarTSE();
+        text.textContent = '✅ Dados de ' + carregados + ' municípios salvos com sucesso!';
+        setTimeout(function() { container.classList.remove('active'); }, 3000);
+        
+        // Recarrega a grade
+        renderGrid(municipios);
+    } catch(e) {
+        text.textContent = '❌ Erro: ' + e.message;
+        setTimeout(function() { container.classList.remove('active'); }, 5000);
+    }
 }
 
 // ============ BUSCA ============
@@ -194,8 +298,9 @@ function renderGrid(data) {
     var html = '';
     for (var i = 0; i < data.length; i++) {
         var m = data[i];
+        var temDados = tseCompleto[String(m.numero)] && tseCompleto[String(m.numero)].prefeito;
         html += '<div class="muni-card" onclick="openDetail(' + m.numero + ')">' +
-            '<h3>' + m.municipio + ' <span style="color:var(--text2);font-weight:400;">Nº ' + m.numero + '</span></h3>' +
+            '<h3>' + m.municipio + ' <span style="color:var(--text2);font-weight:400;">Nº ' + m.numero + '</span>' + (temDados ? ' ✅' : '') + '</h3>' +
             '<p class="meta">👥 ' + formatNumber(m.populacao) + ' hab · 🗳️ ' + formatNumber(m.eleitores) + ' eleitores</p>' +
         '</div>';
     }
@@ -210,6 +315,7 @@ function openDetail(numero) {
     var ver = vereadoresData[mun.municipio.toUpperCase()] || [];
     var est = depEstData[String(mun.numero)] || [];
     var fed = depFedData[String(mun.numero)] || [];
+    var tse = tseCompleto[String(numero)] || null;
 
     var mapUrl = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + mun.lat + ',' + mun.lng + '&zoom=12&size=800x200&maptype=mapnik';
 
@@ -220,102 +326,35 @@ function openDetail(numero) {
         '<div class="info-item"><div class="label">População (IBGE 2025)</div><div class="value" style="color:#58a6ff;">' + formatNumber(mun.populacao) + '</div></div>' +
         '<div class="info-item"><div class="label">Eleitores (TSE 2024)</div><div class="value">' + formatNumber(mun.eleitores) + '</div></div>';
 
-    // Prefeito com votação editável
-    var dadosMun = votosSalvos[String(numero)] || {};
-    var votosPref = dadosMun.prefeito !== undefined ? dadosMun.prefeito : null;
-    var prefNome = mun.prefeito || 'Não disponível';
-    html += '<div class="info-item">' +
-        '<div class="label">Prefeito(a) 2025-2028</div>' +
-        '<div class="value">' + prefNome + '</div>' +
-        '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">' +
-            'Votação: <span class="editable" onclick="editarVotoPrefeito(event, ' + numero + ')">' + (votosPref !== null ? formatNumber(votosPref) + ' votos' : 'Clique para informar') + '</span>' +
-        '</div>' +
-    '</div>';
+    if (tse && tse.prefeito) {
+        var p = tse.prefeito;
+        html += '<div class="info-item" style="grid-column: 1 / -1;">' +
+            '<div class="label">Prefeito(a) Eleito(a) 2025-2028</div>' +
+            '<div style="font-size:1.1rem; font-weight:700; margin: 0.5rem 0;">' + p.nome + ' <span class="badge">' + p.partido + '</span></div>' +
+            '<div style="font-size:0.9rem; color:var(--text2);">' +
+                '<div>🗳️ <strong>' + formatNumber(p.votos) + ' votos</strong> (' + p.percentual + ')</div>' +
+                '<div>👤 Vice: ' + (p.vice || 'Não informado') + '</div>' +
+                '<div>🤝 Coligação: ' + (p.coligacao || 'Não informado') + '</div>' +
+            '</div>' +
+        '</div>';
+    } else {
+        html += '<div class="info-item">' +
+            '<div class="label">Prefeito(a) 2025-2028</div>' +
+            '<div class="value">' + (mun.prefeito || 'Não disponível') + '</div>' +
+            '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Dados complementares não carregados. Clique em "Importar dados do TSE".</div>' +
+        '</div>';
+    }
 
     html += '<div class="info-item"><div class="label">Coordenadas</div><div class="value" style="font-size:0.85rem;">' + (mun.lat ? mun.lat.toFixed(4) : 'N/A') + ', ' + (mun.lng ? mun.lng.toFixed(4) : 'N/A') + '</div></div>';
     html += '</div>';
 
-    // Vereadores com votação editável
-    html += buildAccordion('👤 Vereadores (' + ver.length + ')', buildVereadoresTable(ver, numero));
+    html += buildAccordion('👤 Vereadores (' + ver.length + ')', buildVereadoresTable(ver, tse));
     html += buildAccordion('📊 Deputados Estaduais (' + est.length + ' candidatos)', buildDeputadosTable(est));
     html += buildAccordion('🏛️ Deputados Federais (' + fed.length + ' candidatos)', buildDeputadosTable(fed));
 
     document.getElementById('detail-content').innerHTML = html;
     document.getElementById('detail-overlay').classList.add('show');
     initAccordions();
-}
-
-// ============ EDIÇÃO DE VOTOS ============
-function editarVotoPrefeito(event, numero) {
-    event.stopPropagation();
-    var span = event.target;
-    var atual = votosSalvos[String(numero)]?.prefeito || '';
-    var input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'votos-input';
-    input.value = atual;
-    input.placeholder = 'Nº votos';
-    input.onkeydown = function(e) {
-        if (e.key === 'Enter') {
-            salvarVotoPrefeito(numero, input.value);
-        }
-    };
-    input.onblur = function() {
-        salvarVotoPrefeito(numero, input.value);
-    };
-    span.innerHTML = '';
-    span.appendChild(input);
-    setTimeout(function() { input.focus(); input.select(); }, 50);
-}
-
-function salvarVotoPrefeito(numero, valor) {
-    var num = Number(valor.replace(/\D/g, ''));
-    if (!isNaN(num) && num >= 0) {
-        if (!votosSalvos[String(numero)]) votosSalvos[String(numero)] = {};
-        votosSalvos[String(numero)].prefeito = num;
-    } else {
-        if (votosSalvos[String(numero)]) delete votosSalvos[String(numero)].prefeito;
-    }
-    salvarDados();
-    openDetail(numero); // recarrega
-}
-
-function editarVotoVereador(event, numeroMun, nome, partido) {
-    event.stopPropagation();
-    var span = event.target;
-    var chave = nome + '|' + partido;
-    var atual = (votosSalvos[String(numeroMun)]?.vereadores || {})[chave] || '';
-    var input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'votos-input';
-    input.value = atual;
-    input.placeholder = 'Votos';
-    input.onkeydown = function(e) {
-        if (e.key === 'Enter') {
-            salvarVotoVereador(numeroMun, chave, input.value);
-        }
-    };
-    input.onblur = function() {
-        salvarVotoVereador(numeroMun, chave, input.value);
-    };
-    span.innerHTML = '';
-    span.appendChild(input);
-    setTimeout(function() { input.focus(); input.select(); }, 50);
-}
-
-function salvarVotoVereador(numeroMun, chave, valor) {
-    var num = Number(valor.replace(/\D/g, ''));
-    if (!isNaN(num) && num >= 0) {
-        if (!votosSalvos[String(numeroMun)]) votosSalvos[String(numeroMun)] = {};
-        if (!votosSalvos[String(numeroMun)].vereadores) votosSalvos[String(numeroMun)].vereadores = {};
-        votosSalvos[String(numeroMun)].vereadores[chave] = num;
-    } else {
-        if (votosSalvos[String(numeroMun)]?.vereadores) {
-            delete votosSalvos[String(numeroMun)].vereadores[chave];
-        }
-    }
-    salvarDados();
-    openDetail(numeroMun); // recarrega
 }
 
 function closeDetail() { document.getElementById('detail-overlay').classList.remove('show'); }
@@ -338,19 +377,19 @@ function initAccordions() {
 }
 
 // ============ TABELAS ============
-function buildVereadoresTable(list, numeroMun) {
+function buildVereadoresTable(list, tse) {
     var html = '<table><thead><tr><th>Nome</th><th>Partido</th><th>Nº</th><th>Votos</th><th>Situação</th></tr></thead><tbody>';
     if (list.length === 0) {
         html += '<tr><td colspan="5" style="text-align:center;color:var(--text2);">Nenhum dado disponível</td></tr>';
     } else {
-        var dadosMun = votosSalvos[String(numeroMun)] || {};
-        var verSalvos = dadosMun.vereadores || {};
+        var votosMap = {};
+        if (tse && tse.vereadores) {
+            tse.vereadores.forEach(function(v) { votosMap[v.nome + '|' + v.partido] = v.votos; });
+        }
         list.forEach(function(v) {
             var chave = v.nome + '|' + v.partido;
-            var votos = verSalvos[chave] !== undefined ? verSalvos[chave] : null;
-            html += '<tr><td>' + v.nome + '</td><td><span class="badge">' + v.partido + '</span></td><td>' + v.numero + '</td>' +
-                '<td><span class="editable" onclick="editarVotoVereador(event, ' + numeroMun + ', \'' + v.nome.replace(/'/g, "\\'") + '\', \'' + v.partido.replace(/'/g, "\\'") + '\')">' + (votos !== null ? formatNumber(votos) : '--') + '</span></td>' +
-                '<td>' + (v.situacao || 'Eleito') + '</td></tr>';
+            var votos = votosMap[chave] !== undefined ? formatNumber(votosMap[chave]) : '--';
+            html += '<tr><td>' + v.nome + '</td><td><span class="badge">' + v.partido + '</span></td><td>' + v.numero + '</td><td>' + votos + '</td><td>' + (v.situacao || 'Eleito') + '</td></tr>';
         });
     }
     html += '</tbody></table>';
