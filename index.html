@@ -118,8 +118,8 @@
             <button class="btn btn-outline" onclick="showPage('hero-page')">← Voltar</button>
         </div>
         <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-            <button class="btn-outline" id="btn-load-json">📂 Carregar dados complementares (JSON)</button>
-            <span style="font-size:0.75rem;color:var(--text2);">(coloque o arquivo dados_tse.json na mesma pasta)</span>
+            <button class="btn-outline" id="btn-load-json" style="cursor:pointer;">📂 Carregar JSON com dados do TSE</button>
+            <span style="font-size:0.75rem;color:var(--text2);">(execute o script corrigido acima e selecione o arquivo gerado)</span>
             <input type="file" id="file-json" accept=".json" style="display:none;">
         </div>
         <input type="text" class="search-box" id="muni-search" placeholder="Buscar por nome ou número...">
@@ -149,7 +149,6 @@ var DEP_FED_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7Txf
 var municipios = [], vereadoresData = {}, depEstData = {}, depFedData = {};
 var dadosTSE = {};
 
-// Tenta carregar automático do localStorage
 try { dadosTSE = JSON.parse(localStorage.getItem('raiox_tse') || '{}'); } catch(e) {}
 
 function formatNumber(val) {
