@@ -1,8 +1,10 @@
->
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raio-X Político do Paraná</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0d1117;
@@ -13,11 +15,10 @@
             --accent: #58a6ff;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
         .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
         h1, h2, h3 { font-weight: 600; }
         a { color: var(--accent); text-decoration: none; }
-
         .topbar {
             background: var(--surface); border-bottom: 1px solid var(--border);
             padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
@@ -25,12 +26,12 @@
         .topbar .logo { font-weight: 700; font-size: 1rem; color: var(--text); letter-spacing: 0.5px; }
         .topbar .logo span { color: var(--accent); }
         .hero { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); }
-        .hero h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-        .hero p { color: var(--text2); max-width: 600px; }
-        .stats { display: flex; gap: 1rem; margin: 1.5rem 0; }
-        .stat-box { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
-        .stat-box .number { font-size: 2rem; font-weight: 700; color: #fff; }
-        .stat-box .label { font-size: 0.75rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.25rem; }
+        .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .hero p { color: var(--text2); max-width: 700px; font-size: 1.1rem; }
+        .stats { display: flex; gap: 1.5rem; margin: 2rem 0; }
+        .stat-box { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
+        .stat-box .number { font-size: 2.2rem; font-weight: 700; color: #fff; }
+        .stat-box .label { font-size: 0.8rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.25rem; }
         .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; }
         .card .row { display: flex; gap: 1rem; align-items: center; }
         .card .avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
@@ -62,11 +63,12 @@
         .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; background: rgba(88,166,255,0.15); color: var(--accent); }
         .footer { text-align: center; padding: 1.5rem; color: var(--text2); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
         .hidden { display: none !important; }
+        .history-text { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; color: var(--text2); font-size: 0.95rem; line-height: 1.8; margin: 1.5rem 0; }
+        .history-text h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #fff; margin-bottom: 1rem; }
     </style>
 </head>
 <body>
 
-<!-- Top bar -->
 <div class="topbar">
     <div class="logo">RAIO‑X <span>POLÍTICO</span> · PARANÁ</div>
     <span style="color:var(--text2);font-size:0.8rem;">Dados oficiais TSE · IBGE</span>
@@ -77,28 +79,37 @@
     <div class="container">
         <div class="hero">
             <h1>Raio‑X Político do Paraná</h1>
-            <p>Informações detalhadas sobre os 399 municípios: população, eleitores, prefeitos, vereadores e votação para deputados estaduais e federais.</p>
+            <p>Informações detalhadas sobre os 399 municípios: população, eleitores, prefeitos, vereadores e a votação completa para deputados estaduais e federais.</p>
         </div>
+
         <div class="stats">
             <div class="stat-box"><div class="number">11.890.517</div><div class="label">Habitantes (IBGE 2025)</div></div>
             <div class="stat-box"><div class="number">8.646.524</div><div class="label">Eleitores (TSE 2024)</div></div>
             <div class="stat-box"><div class="number">399</div><div class="label">Municípios</div></div>
         </div>
+
         <div class="card">
             <div class="row">
                 <div class="avatar">👤</div>
                 <div>
                     <strong>Carlos Massa Ratinho Junior</strong> · PSD<br>
-                    <span style="color:var(--text2);">Governador do Paraná · Reeleito 2022</span>
+                    <span style="color:var(--text2);">Governador do Paraná · Reeleito em 2022</span>
                 </div>
             </div>
         </div>
-        <div style="margin-top:1.5rem;">
+
+        <div class="history-text">
+            <h2>Um Pouco da Nossa História</h2>
+            <p>O Paraná, cujo nome deriva do rio Paraná ("rio caudaloso" em tupi-guarani), foi uma das regiões brasileiras de ocupação mais recente. Seu território era habitado pelos povos indígenas tupi-guaranis, caingangues e xoclengues antes da chegada dos colonizadores. No século XVII, portugueses e espanhóis iniciaram a colonização a partir do litoral, fundando Paranaguá e Curitiba.</p>
+            <p style="margin-top: 1rem;">A província do Paraná foi desmembrada de São Paulo em 1853. No final do século XIX, a economia prosperou com a erva-mate, madeira e café. As férteis "terras roxas" do norte atraíram migrantes gaúchos, paulistas, mineiros e nordestinos, moldando a diversidade cultural do estado. Hoje, o Paraná é uma potência agrícola e industrial, com o 5º maior eleitorado do Brasil.</p>
+        </div>
+
+        <div style="margin-top:2rem;">
             <button class="btn" onclick="showPage('muni-page')">Acessar lista de municípios →</button>
         </div>
     </div>
     <div class="footer">
-        Desenvolvido por <strong>Tiago Sant’ana</strong> — (43) 9 9984-1190 · 
+        Desenvolvido por <strong>Tiago Sant'ana</strong> — (43) 9 9984-1190 · 
         <a href="https://instagram.com/tiagosantana_1986" target="_blank">@tiagosantana_1986</a><br>
         Ferramenta criada para otimizar o tempo de políticos e consultores em visitas aos municípios da base.
     </div>
@@ -108,14 +119,14 @@
 <div id="muni-page" class="hidden">
     <div class="container">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-            <h2>Municípios do Paraná</h2>
+            <h2>📍 399 Municípios do Paraná</h2>
             <button class="btn btn-outline" onclick="showPage('hero-page')">← Voltar</button>
         </div>
         <input type="text" class="search-box" id="muni-search" placeholder="Buscar por nome ou número...">
         <div class="grid" id="muni-grid"></div>
     </div>
     <div class="footer">
-        Desenvolvido por <strong>Tiago Sant’ana</strong> — (43) 9 9984-1190 · 
+        Desenvolvido por <strong>Tiago Sant'ana</strong> — (43) 9 9984-1190 · 
         <a href="https://instagram.com/tiagosantana_1986" target="_blank">@tiagosantana_1986</a>
     </div>
 </div>
@@ -135,40 +146,11 @@ var VEREADORES_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7
 var DEP_EST_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_estaduais_836_por_votos_c23cdb53.json';
 var DEP_FED_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_federais_pr_2022_6f15c9c1.json';
 
-// ============ DADOS OFICIAIS LOCAIS (substitua pelo JSON completo do TSE) ============
-var DADOS_OFICIAIS = {
-    "1": { // Abatiá
-        prefeito: { nome: "Sônia Chaves", partido: "PSD", votos: 4152 },
-        vereadores: [
-            { nome: "JOÃO PEDRO DA SILVA", partido: "PP", votos: 620 },
-            { nome: "MARIA APARECIDA FERREIRA DE SOUZA", partido: "PP", votos: 580 },
-            { nome: "JOSÉ ALVES DOS SANTOS", partido: "MDB", votos: 510 },
-            { nome: "ANA PAULA OLIVEIRA LIMA", partido: "MDB", votos: 490 },
-            { nome: "CARLOS EDUARDO RODRIGUES PEREIRA", partido: "PODE", votos: 450 },
-            { nome: "LUCIANA MARTINS COSTA", partido: "PODE", votos: 430 },
-            { nome: "ROBERTO CARLOS DE ANDRADE", partido: "PL", votos: 400 },
-            { nome: "FERNANDA GONÇALVES MARTINS", partido: "PL", votos: 380 },
-            { nome: "PAULO HENRIQUE SOUZA LIMA", partido: "PT", votos: 350 }
-        ]
-    },
-    "3": { // Agudos do Sul
-        prefeito: { nome: "Rogério Neres", partido: "PSD", votos: 3821 },
-        vereadores: [
-            { nome: "VISSÃO DO POSTO", partido: "PP", votos: 720 },
-            { nome: "BRUNO ESCARABEL", partido: "PP", votos: 680 },
-            { nome: "LINCÃO", partido: "PP", votos: 640 },
-            { nome: "DÔ SAÚDE", partido: "MDB", votos: 590 },
-            { nome: "CHULÉ", partido: "MDB", votos: 560 },
-            { nome: "JACKSON GOBBO", partido: "MDB", votos: 530 },
-            { nome: "NANINHO GARI", partido: "PODE", votos: 500 },
-            { nome: "DENES LEÃO DA AMBULÂNCIA", partido: "PODE", votos: 470 },
-            { nome: "ZÉ DA FARMÁCIA", partido: "PL", votos: 440 }
-        ]
-    }
-};
+// ============ COLE AQUI O CONTEÚDO DO ARQUIVO 'dados_completos.json' ============
+var DADOS_OFICIAIS = { /* COLE O CONTEÚDO AQUI */ };
 
 // ============ ESTADO GLOBAL ============
-var municipios = [], vereadoresData = {}, depEstData = {}, depFedData = {}, extraData = {};
+var municipios = [], vereadoresData = {}, depEstData = {}, depFedData = {}, dadosComplementares = DADOS_OFICIAIS;
 
 function formatNumber(val) {
     var n = Number(val);
@@ -181,6 +163,7 @@ function showPage(id) {
     document.getElementById(id).classList.remove('hidden');
 }
 
+// ============ BUSCA ============
 document.addEventListener('DOMContentLoaded', function() {
     var searchInput = document.getElementById('muni-search');
     if (searchInput) {
@@ -194,6 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// ============ GRADE ============
 function renderGrid(data) {
     var grid = document.getElementById('muni-grid');
     if (!data.length) { grid.innerHTML = '<p style="color:var(--text2); text-align:center; padding:2rem;">Nenhum município encontrado.</p>'; return; }
@@ -208,10 +192,7 @@ function renderGrid(data) {
     grid.innerHTML = html;
 }
 
-function getExtra(numero) {
-    return extraData[String(numero)] || DADOS_OFICIAIS[String(numero)] || null;
-}
-
+// ============ DETALHES ============
 function openDetail(numero) {
     var mun = municipios.find(function(m) { return m.numero === numero; });
     if (!mun) return;
@@ -219,7 +200,7 @@ function openDetail(numero) {
     var ver = vereadoresData[mun.municipio.toUpperCase()] || [];
     var est = depEstData[String(mun.numero)] || [];
     var fed = depFedData[String(mun.numero)] || [];
-    var extra = getExtra(numero);
+    var extra = dadosComplementares[String(numero)] || null;
 
     var mapUrl = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + mun.lat + ',' + mun.lng + '&zoom=12&size=800x200&maptype=mapnik';
 
@@ -236,7 +217,7 @@ function openDetail(numero) {
     html += '<div class="info-item">' +
         '<div class="label">Prefeito(a) 2025-2028</div>' +
         '<div class="value">' + prefNome + (prefPartido ? ' <span class="badge">' + prefPartido + '</span>' : '') + '</div>' +
-        (prefVotos !== null ? '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Votação: ' + formatNumber(prefVotos) + ' votos</div>' : '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Votação não disponível</div>') +
+        (prefVotos !== null ? '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Votação: ' + formatNumber(prefVotos) + ' votos</div>' : '<div style="margin-top:4px;color:var(--text2);font-size:0.8rem;">Votação indisponível</div>') +
     '</div>';
 
     html += '<div class="info-item"><div class="label">Coordenadas</div><div class="value" style="font-size:0.85rem;">' + (mun.lat ? mun.lat.toFixed(4) : 'N/A') + ', ' + (mun.lng ? mun.lng.toFixed(4) : 'N/A') + '</div></div>';
@@ -253,6 +234,7 @@ function openDetail(numero) {
 
 function closeDetail() { document.getElementById('detail-overlay').classList.remove('show'); }
 
+// ============ ACCORDION ============
 function buildAccordion(title, body) {
     return '<div class="accordion"><div class="accordion-header" onclick="toggleAccordion(this)"><span>' + title + '</span><span class="arrow">▼</span></div><div class="accordion-body">' + body + '</div></div>';
 }
@@ -269,6 +251,7 @@ function initAccordions() {
     document.querySelectorAll('.accordion-body').forEach(function(b) { b.style.maxHeight = '0'; });
 }
 
+// ============ TABELAS ============
 function buildVereadoresTable(list, extra) {
     var html = '<table><thead><tr><th>Nome</th><th>Partido</th><th>Nº</th><th>Votos</th><th>Situação</th></tr></thead><tbody>';
     if (list.length === 0) {
