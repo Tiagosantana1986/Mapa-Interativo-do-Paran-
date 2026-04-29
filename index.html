@@ -7,12 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0d1117;
-            --surface: #161b22;
-            --border: #30363d;
-            --text: #c9d1d9;
-            --text2: #8b949e;
-            --accent: #58a6ff;
+            --bg: #0d1117; --surface: #161b22; --border: #30363d; --text: #c9d1d9; --text2: #8b949e; --accent: #58a6ff;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
@@ -123,8 +118,8 @@
             <button class="btn btn-outline" onclick="showPage('hero-page')">← Voltar</button>
         </div>
         <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-            <button class="btn-outline" id="btn-load-json" style="cursor:pointer;">📂 Carregar JSON com dados do TSE</button>
-            <span style="font-size:0.75rem;color:var(--text2);">(execute o script Node.js e carregue o arquivo gerado)</span>
+            <button class="btn-outline" id="btn-load-json">📂 Carregar dados complementares (JSON)</button>
+            <span style="font-size:0.75rem;color:var(--text2);">(coloque o arquivo dados_tse.json na mesma pasta)</span>
             <input type="file" id="file-json" accept=".json" style="display:none;">
         </div>
         <input type="text" class="search-box" id="muni-search" placeholder="Buscar por nome ou número...">
@@ -154,7 +149,7 @@ var DEP_FED_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7Txf
 var municipios = [], vereadoresData = {}, depEstData = {}, depFedData = {};
 var dadosTSE = {};
 
-// Carrega cache do localStorage
+// Tenta carregar automático do localStorage
 try { dadosTSE = JSON.parse(localStorage.getItem('raiox_tse') || '{}'); } catch(e) {}
 
 function formatNumber(val) {
@@ -168,7 +163,7 @@ function showPage(id) {
     document.getElementById(id).classList.remove('hidden');
 }
 
-// ============ CARREGAR JSON ============
+// ============ CARREGAR JSON MANUAL ============
 document.getElementById('btn-load-json')?.addEventListener('click', function() {
     document.getElementById('file-json').click();
 });
@@ -359,66 +354,3 @@ loadData();
 </script>
 </body>
 </html>
-const https = require('https');
-const fs = require('fs');
-
-function fetchJSON(url) {
-    return new Promise((resolve, reject) => {
-        https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => {
-                try { resolve(JSON.parse(data)); } catch (e) { reject(e); }
-            });
-        }).on('error', reject);
-    });
-}
-
-async function main() {
-    console.log('🔍 Obtendo lista de municípios do TSE...');
-    const lista = await fetchJSON('https://resultados.tse.jus.br/oficial/eleicao/e619/2024/json/UF/PR/municipios.json');
-    const municipiosTSE = lista.municipios || [];
-    
-    console.log('🔍 Obtendo lista do GeoJSON...');
-    const geo = await fetchJSON('https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/parana_municipios_2d5ac5bd.geojson');
-    const municipios = geo.features
-        .filter(f => f.properties && f.properties.numero)
-        .map(f => ({ numero: f.properties.numero, nome: f.properties.municipio }))
-        .sort((a, b) => a.numero - b.numero);
-
-    const mapaCodigos = {};
-    municipiosTSE.forEach(mun => {
-        const nome = mun.nm.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        mapaCodigos[nome] = mun.codigo;
-    });
-
-    const dados = {};
-    let sucessos = 0;
-
-    for (const mun of municipios) {
-        const nomeGeo = mun.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        const codigo = mapaCodigos[nomeGeo];
-        if (!codigo) continue;
-        try {
-            console.log(`🔍 ${mun.numero} - ${mun.nome}`);
-            const data = await fetchJSON(`https://resultados.tse.jus.br/oficial/eleicao/e619/2024/json/UF/PR/municipios/${codigo}/turno1.json`);
-            const prefeito = (data.cand || []).find(c => c.cargo === 'Prefeito' && c.e === 'e');
-            const vereadores = (data.cand || []).filter(c => c.cargo === 'Vereador' && c.e === 'e');
-            dados[String(mun.numero)] = {
-                prefeito: prefeito ? {
-                    nome: prefeito.nm, partido: prefeito.partido, vice: prefeito.vice || '',
-                    coligacao: prefeito.coligacao || '', votos: Number(prefeito.vap),
-                    percentual: prefeito.pvap ? Number(prefeito.pvap).toFixed(2) + '%' : ''
-                } : null,
-                vereadores: vereadores.map(v => ({ nome: v.nm, partido: v.partido, votos: Number(v.vap) }))
-            };
-            sucessos++;
-            console.log(`   ✔ OK`);
-        } catch (err) { console.log(`   ✖ Erro`); }
-        await new Promise(r => setTimeout(r, 100));
-    }
-    fs.writeFileSync('dados_tse.json', JSON.stringify(dados, null, 2));
-    console.log(`\n✅ Concluído! Sucessos: ${sucessos}/${municipios.length}`);
-}
-
-main().catch(console.error);
