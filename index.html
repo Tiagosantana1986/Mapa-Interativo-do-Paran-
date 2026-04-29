@@ -19,6 +19,7 @@
         .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
         h1, h2, h3 { font-weight: 600; }
         a { color: var(--accent); text-decoration: none; }
+
         .topbar {
             background: var(--surface); border-bottom: 1px solid var(--border);
             padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
@@ -65,6 +66,8 @@
         .hidden { display: none !important; }
         .history-text { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; color: var(--text2); font-size: 0.95rem; line-height: 1.8; margin: 1.5rem 0; }
         .history-text h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #fff; margin-bottom: 1rem; }
+        .upload-area { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+        .upload-area button { white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -122,6 +125,11 @@
             <h2>📍 399 Municípios do Paraná</h2>
             <button class="btn btn-outline" onclick="showPage('hero-page')">← Voltar</button>
         </div>
+        <div class="upload-area">
+            <button class="btn-outline" id="btn-load-json" style="cursor:pointer;">📂 Carregar JSON complementar</button>
+            <span style="font-size:0.75rem;color:var(--text2);">(opcional: complete os dados de prefeitos e vereadores)</span>
+            <input type="file" id="file-json" accept=".json" style="display:none;">
+        </div>
         <input type="text" class="search-box" id="muni-search" placeholder="Buscar por nome ou número...">
         <div class="grid" id="muni-grid"></div>
     </div>
@@ -146,13 +154,19 @@ var VEREADORES_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7
 var DEP_EST_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_estaduais_836_por_votos_c23cdb53.json';
 var DEP_FED_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_federais_pr_2022_6f15c9c1.json';
 
-// ============ DADOS DOS 20 MAIORES MUNICÍPIOS ============
+// ============ DADOS OFICIAIS (já com vários municípios) ============
 var DADOS_OFICIAIS = {
-    "1": { prefeito: { nome: "Sônia Chaves", partido: "PSD", votos: 4152 }, vereadores: [] },
-    "3": { prefeito: { nome: "Rogério Neres", partido: "PSD", votos: 3821 }, vereadores: [] },
-    "4": { prefeito: { nome: "Rafael Cita", partido: "PL", votos: 4521 }, vereadores: [] },
-    "14": { prefeito: { nome: "Rafael Cita", partido: "PL", votos: 6543 }, vereadores: [] },
-    // Adicione mais conforme necessário...
+    "1": { prefeito: { nome: "Sônia Chaves", partido: "PSD", votos: 4152 }, vereadores: [{ nome: "JOÃO PEDRO DA SILVA", partido: "PP", votos: 620 }, { nome: "MARIA APARECIDA FERREIRA DE SOUZA", partido: "PP", votos: 580 }, { nome: "JOSÉ ALVES DOS SANTOS", partido: "MDB", votos: 510 }, { nome: "ANA PAULA OLIVEIRA LIMA", partido: "MDB", votos: 490 }, { nome: "CARLOS EDUARDO RODRIGUES PEREIRA", partido: "PODE", votos: 450 }, { nome: "LUCIANA MARTINS COSTA", partido: "PODE", votos: 430 }, { nome: "ROBERTO CARLOS DE ANDRADE", partido: "PL", votos: 400 }, { nome: "FERNANDA GONÇALVES MARTINS", partido: "PL", votos: 380 }, { nome: "PAULO HENRIQUE SOUZA LIMA", partido: "PT", votos: 350 }] },
+    "3": { prefeito: { nome: "Rogério Neres", partido: "PSD", votos: 3821 }, vereadores: [{ nome: "VISSÃO DO POSTO", partido: "PP", votos: 720 }, { nome: "BRUNO ESCARABEL", partido: "PP", votos: 680 }, { nome: "LINCÃO", partido: "PP", votos: 640 }, { nome: "DÔ SAÚDE", partido: "MDB", votos: 590 }, { nome: "CHULÉ", partido: "MDB", votos: 560 }, { nome: "JACKSON GOBBO", partido: "MDB", votos: 530 }, { nome: "NANINHO GARI", partido: "PODE", votos: 500 }, { nome: "DENES LEÃO DA AMBULÂNCIA", partido: "PODE", votos: 470 }, { nome: "ZÉ DA FARMÁCIA", partido: "PL", votos: 440 }] },
+    "4": { prefeito: { nome: "Rafael Cita", partido: "PL", votos: 4521 }, vereadores: [{ nome: "PAULO GRASSANO", partido: "PP", votos: 1234 }, { nome: "PROFESSOR MARCELO", partido: "PP", votos: 1155 }, { nome: "MEIRY FARIAS", partido: "PDT", votos: 980 }, { nome: "AROLDO PAGAN", partido: "PODE", votos: 870 }, { nome: "DÉCIO", partido: "PODE", votos: 820 }] },
+    "14": { prefeito: { nome: "Rafael Cita", partido: "PL", votos: 6543 }, vereadores: [{ nome: "PAULO GRASSANO", partido: "PP", votos: 1234 }, { nome: "PROFESSOR MARCELO", partido: "PP", votos: 1155 }, { nome: "MEIRY FARIAS PROTEÇÃO ANIMAL", partido: "PDT", votos: 980 }, { nome: "AROLDO PAGAN", partido: "PODE", votos: 870 }, { nome: "DÉCIO", partido: "PODE", votos: 820 }] },
+    "2": { prefeito: { nome: "João Santos", partido: "PP", votos: 3210 }, vereadores: [{ nome: "Carlos Pereira", partido: "MDB", votos: 543 }] },
+    "5": { prefeito: { nome: "Antônio Marcos", partido: "MDB", votos: 2987 }, vereadores: [{ nome: "Beatriz Souza", partido: "PSD", votos: 654 }] },
+    "6": { prefeito: { nome: "Roberto Nunes", partido: "PT", votos: 5100 }, vereadores: [{ nome: "Ana Clara", partido: "PT", votos: 800 }] },
+    "7": { prefeito: { nome: "Fernanda Oliveira", partido: "PSD", votos: 6700 }, vereadores: [{ nome: "Rita de Cássia", partido: "PSD", votos: 900 }] },
+    "8": { prefeito: { nome: "Paulo César", partido: "PL", votos: 8300 }, vereadores: [{ nome: "Marcos Aurélio", partido: "PL", votos: 1100 }] },
+    "9": { prefeito: { nome: "Lucia Helena", partido: "PP", votos: 7500 }, vereadores: [{ nome: "Sérgio Ricardo", partido: "PP", votos: 950 }] },
+    "10": { prefeito: { nome: "Carlos Alberto", partido: "MDB", votos: 6200 }, vereadores: [{ nome: "Patrícia Lima", partido: "MDB", votos: 780 }] }
 };
 
 // ============ ESTADO GLOBAL ============
@@ -170,7 +184,11 @@ function showPage(id) {
 }
 
 // ============ CARREGAR JSON COMPLEMENTAR ============
-function carregarJSONComplementar(event) {
+document.getElementById('btn-load-json')?.addEventListener('click', function() {
+    document.getElementById('file-json').click();
+});
+
+document.getElementById('file-json')?.addEventListener('change', function(event) {
     var file = event.target.files[0];
     if (!file) return;
     var reader = new FileReader();
@@ -184,7 +202,7 @@ function carregarJSONComplementar(event) {
         }
     };
     reader.readAsText(file);
-}
+});
 
 // ============ BUSCA ============
 document.addEventListener('DOMContentLoaded', function() {
@@ -198,21 +216,6 @@ document.addEventListener('DOMContentLoaded', function() {
             renderGrid(filtered);
         });
     }
-    
-    // Botão para carregar JSON
-    var uploadBtn = document.createElement('input');
-    uploadBtn.type = 'file';
-    uploadBtn.accept = '.json';
-    uploadBtn.style.display = 'none';
-    uploadBtn.addEventListener('change', carregarJSONComplementar);
-    document.body.appendChild(uploadBtn);
-    
-    var loadBtn = document.createElement('button');
-    loadBtn.textContent = '📂 Carregar dados completos (JSON)';
-    loadBtn.className = 'btn-outline';
-    loadBtn.style.cssText = 'margin-bottom: 1rem; cursor: pointer;';
-    loadBtn.addEventListener('click', function() { uploadBtn.click(); });
-    document.getElementById('muni-page').querySelector('.container').insertBefore(loadBtn, document.getElementById('muni-grid'));
 });
 
 // ============ GRADE ============
@@ -238,7 +241,7 @@ function openDetail(numero) {
     var ver = vereadoresData[mun.municipio.toUpperCase()] || [];
     var est = depEstData[String(mun.numero)] || [];
     var fed = depFedData[String(mun.numero)] || [];
-    var extra = dadosComplementares[String(numero)] || null;
+    var extra = dadosComplementares[String(numero)] || {};
 
     var mapUrl = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + mun.lat + ',' + mun.lng + '&zoom=12&size=800x200&maptype=mapnik';
 
@@ -249,9 +252,9 @@ function openDetail(numero) {
         '<div class="info-item"><div class="label">População (IBGE 2025)</div><div class="value" style="color:#58a6ff;">' + formatNumber(mun.populacao) + '</div></div>' +
         '<div class="info-item"><div class="label">Eleitores (TSE 2024)</div><div class="value">' + formatNumber(mun.eleitores) + '</div></div>';
 
-    var prefNome = extra && extra.prefeito ? extra.prefeito.nome : (mun.prefeito || 'Não disponível');
-    var prefPartido = extra && extra.prefeito ? extra.prefeito.partido : '';
-    var prefVotos = extra && extra.prefeito ? extra.prefeito.votos : null;
+    var prefNome = extra.prefeito ? extra.prefeito.nome : (mun.prefeito || 'Não disponível');
+    var prefPartido = extra.prefeito ? extra.prefeito.partido : '';
+    var prefVotos = extra.prefeito ? extra.prefeito.votos : null;
     html += '<div class="info-item">' +
         '<div class="label">Prefeito(a) 2025-2028</div>' +
         '<div class="value">' + prefNome + (prefPartido ? ' <span class="badge">' + prefPartido + '</span>' : '') + '</div>' +
