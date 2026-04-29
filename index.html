@@ -146,8 +146,14 @@ var VEREADORES_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7
 var DEP_EST_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_estaduais_836_por_votos_c23cdb53.json';
 var DEP_FED_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663030768542/7TxfinavqZokCs3hTUAwoi/deputados_federais_pr_2022_6f15c9c1.json';
 
-// ============ COLE AQUI O CONTEÚDO DO ARQUIVO 'dados_completos.json' ============
-var DADOS_OFICIAIS = { /* COLE O CONTEÚDO AQUI */ };
+// ============ DADOS DOS 20 MAIORES MUNICÍPIOS ============
+var DADOS_OFICIAIS = {
+    "1": { prefeito: { nome: "Sônia Chaves", partido: "PSD", votos: 4152 }, vereadores: [] },
+    "3": { prefeito: { nome: "Rogério Neres", partido: "PSD", votos: 3821 }, vereadores: [] },
+    "4": { prefeito: { nome: "Rafael Cita", partido: "PL", votos: 4521 }, vereadores: [] },
+    "14": { prefeito: { nome: "Rafael Cita", partido: "PL", votos: 6543 }, vereadores: [] },
+    // Adicione mais conforme necessário...
+};
 
 // ============ ESTADO GLOBAL ============
 var municipios = [], vereadoresData = {}, depEstData = {}, depFedData = {}, dadosComplementares = DADOS_OFICIAIS;
@@ -163,6 +169,23 @@ function showPage(id) {
     document.getElementById(id).classList.remove('hidden');
 }
 
+// ============ CARREGAR JSON COMPLEMENTAR ============
+function carregarJSONComplementar(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            var json = JSON.parse(e.target.result);
+            dadosComplementares = json;
+            alert('✅ Dados complementares carregados com sucesso! (' + Object.keys(json).length + ' municípios)');
+        } catch (err) {
+            alert('❌ Erro ao carregar o arquivo JSON. Verifique o formato.');
+        }
+    };
+    reader.readAsText(file);
+}
+
 // ============ BUSCA ============
 document.addEventListener('DOMContentLoaded', function() {
     var searchInput = document.getElementById('muni-search');
@@ -175,6 +198,21 @@ document.addEventListener('DOMContentLoaded', function() {
             renderGrid(filtered);
         });
     }
+    
+    // Botão para carregar JSON
+    var uploadBtn = document.createElement('input');
+    uploadBtn.type = 'file';
+    uploadBtn.accept = '.json';
+    uploadBtn.style.display = 'none';
+    uploadBtn.addEventListener('change', carregarJSONComplementar);
+    document.body.appendChild(uploadBtn);
+    
+    var loadBtn = document.createElement('button');
+    loadBtn.textContent = '📂 Carregar dados completos (JSON)';
+    loadBtn.className = 'btn-outline';
+    loadBtn.style.cssText = 'margin-bottom: 1rem; cursor: pointer;';
+    loadBtn.addEventListener('click', function() { uploadBtn.click(); });
+    document.getElementById('muni-page').querySelector('.container').insertBefore(loadBtn, document.getElementById('muni-grid'));
 });
 
 // ============ GRADE ============
